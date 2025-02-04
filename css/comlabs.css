@@ -1,0 +1,138 @@
+:root {
+    --primary-color: #ffffff;
+    --secondary-color: #3eee6a;
+    --background-color: #e9e7df;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* margin: 0 auto;
+    padding: 0; */
+    font-family: "Noto Sans", serif;
+    
+}
+
+
+.header {
+    background-color: #31a959;
+    display: flex;
+    padding: 10px;
+    padding-left: 100px;
+    
+    /* margin: 0 auto; */
+    /* margin: 5px; */
+    /* width: 500px; */
+
+    /* width: 450px;
+    background-color: #fafafa;
+    border: 1px solid #E8EAED;
+    font-size: 14px;
+    margin: 0 auto; */
+}
+
+
+.primary-color {
+    color: var(--primary-color);
+}
+
+.secondary-color {
+    color: var(--secondary-color);
+}
+
+.website-name {
+    /* padding: 5px 5px 5px 20px; */
+    padding-left: 10px;
+}
+
+
+
+.test {
+    background-image: url("../img-left1.png");
+    background-size: cover;
+    display:grid;
+    background-size: 150px 150px;
+    background-repeat: no-repeat;
+    width: 1000px;
+    height: 1000px;
+    /* margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box; */
+    
+}
+
+.school-logo {
+    /* padding: 10px; */
+    background-image: url("../assets//logo-dlsu.jpg");
+    background-size: contain;
+    width: 45px;
+    background-repeat: no-repeat;
+}
+
+.content-background {
+    /* content: ""; */
+    position: absolute;
+    inset: 0;
+    background-image: url(../assets/1DLSU-at-duskE-1024x416.jpg);
+    filter:blur(3px);
+    z-index: -1;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position:fixed;
+    /* padding: 0 !important; */
+}
+
+.content {
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: var(--background-color);
+    background-size: contain;
+    height: 88vh;
+    border-radius: 5px;
+    padding: 20px;
+    
+}
+
+.subtitle {
+    /* margin: 10px; */
+    padding: 15px;
+    background-color:#b1d05c;
+}
+
+h2 {
+    font-weight: bold;
+    font-size: 40px;
+}
+
+h3 {
+    font-weight: 350px;
+    font-size: 27px;
+    color: #373737
+}
+
+h6 {
+    font-size: 18px;
+    color: #212121;
+}
+
+.input-desc {
+    margin: 50px;
+}
+
+.reserve-date {
+    font-size: 16px;
+    padding: 5px;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+    margin: 10px 5%;
+}
+
+.asterisk {
+    color: red;
+}
