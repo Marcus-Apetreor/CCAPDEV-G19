@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset = "UTF-8">
+        <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
+        <title>Login</title>
+        <link rel = "stylesheet" href = "loginstyle.css">
+    </head>
+    <body>
+        <div class = "login-cell">
+            <form action = "">
+                <h2>Login</h2>
+                <div class = "input-cell">
+                    <span class = "icon"><ion-icon name="body"></ion-icon></ion-icon></span>
+                    <input type = "username" required>
+                    <label>Username</label>
+                </div>
+                <div class = "input-cell">
+                    <span class = "icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type = "password" required>
+                    <label>Password</label>
+                </div>
+                <button type = "button" onclick = "toggleAccountType()">Change Account Type</button>
+                <div class = "account_type", id = "account_type_id" style = "display: none;">
+                    <label>
+                        <input type = "radio" name = "account" value = "student" required> Student Account
+                    </label>
+                    <label>
+                        <input type = "radio" name = "account" value = "officer"> Officer Account
+                    </label>
+                    <label>
+                        <input type = "radio" name = "account" value = "professor"> Professor Account
+                    </label>
+                    <label>
+                        <input type = "radio" name = "account" value = "admin"> Admin Account
+                    </label>
+                </div>
+                <div class = "remember-me">
+                    <label>
+                        <input type = "checkbox"> Remember me
+                    </label>
+                </div>
+                <button type = "submit">Login</button>
+                <div class = "register-link">
+                    <p>Sign up here
+                        <a href = "#">Sign Up</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+        <script>
+            function toggleAccountType() {
+                var account_type = document.getElementById("account_type_id");
+                if (account_type.style.display === "none") {
+                    account_type.style.display = "block";
+                } else {
+                    account_type.style.display = "none";
+                }
+            }
+        </script>
+    </body>
+</html>
+
+<!-- used https://ionic.io/ionicons for icons -->
