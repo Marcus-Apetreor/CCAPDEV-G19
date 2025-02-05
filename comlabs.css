@@ -1,6 +1,6 @@
 :root {
     --primary-color: #ffffff;
-    --secondary-color: #3eee6a;
+    --secondary-color: #31a959;
     --background-color: #e9e7df;
 }
 
@@ -11,30 +11,17 @@
 }
 
 body {
-    /* margin: 0 auto;
-    padding: 0; */
     font-family: "Noto Sans", serif;
     
 }
 
 
 .header {
-    background-color: #31a959;
+    background-color: var(--secondary-color);
     display: flex;
     padding: 10px;
     padding-left: 100px;
-    
-    /* margin: 0 auto; */
-    /* margin: 5px; */
-    /* width: 500px; */
-
-    /* width: 450px;
-    background-color: #fafafa;
-    border: 1px solid #E8EAED;
-    font-size: 14px;
-    margin: 0 auto; */
 }
-
 
 .primary-color {
     color: var(--primary-color);
@@ -50,40 +37,23 @@ body {
 }
 
 
-
-.test {
-    background-image: url("../img-left1.png");
-    background-size: cover;
-    display:grid;
-    background-size: 150px 150px;
-    background-repeat: no-repeat;
-    width: 1000px;
-    height: 1000px;
-    /* margin: 0 auto;
-    padding: 0;
-    box-sizing: border-box; */
-    
-}
-
 .school-logo {
     /* padding: 10px; */
-    background-image: url("../assets//logo-dlsu.jpg");
+    background-image: url("assets-/logo-dlsu.png");
     background-size: contain;
     width: 45px;
     background-repeat: no-repeat;
 }
 
 .content-background {
-    /* content: ""; */
     position: absolute;
     inset: 0;
-    background-image: url(../assets/1DLSU-at-duskE-1024x416.jpg);
+    background-image: url("assets-/1DLSU-at-duskE-1024x416.jpg");
     filter:blur(3px);
     z-index: -1;
     background-size: cover;
     background-repeat: no-repeat;
     position:fixed;
-    /* padding: 0 !important; */
 }
 
 .content {
@@ -132,19 +102,14 @@ h6 {
     margin-left: 20px;
 }
 
-.input-border, #submit-button {
-  /* //  margin: 10px 5%; */
-    margin-top: 10px;
-    margin-left: 5%;
-
-
-}
 
 .input-border, #submit-button {
     font-size: 16px;
     padding: 5px;
     border: 2px solid #4CAF50;
     border-radius: 5px;
+    margin-top: 10px;
+    margin-left: 5%;
     /* margin: 10px 5%; */
 }
 
@@ -177,15 +142,15 @@ h6 {
 
 
 #temporary-seatplan {
-    background-image: url("../assets/seat-plan-temp.png");
+    background-image: url("assets-/seat-plan-temp.png");
     background-size: contain;
     width: 300px;
     height: 300px;
     float: right;
-    position:relative;
-    margin-left: 20%;
+    margin-left: 30%;
     color:#191919;
     text-align: center;
     padding-top: 10%;
     font-weight: bold;
+    position:fixed;
 }
