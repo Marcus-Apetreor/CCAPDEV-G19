@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conference Room Reservation</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        
+        /* Reset default margin and padding for body and html */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative; /* Ensure stacking context */
+            overflow-x: hidden; /* Disable horizontal scrolling */
+        }
+
+        .bg-left {
+            background-image: url('img/henry.jpg');
+            background-size: cover;
+            background-position: center;
+            width: 41%; /* Adjust width as needed */
+            height: 100vh;
+            position: absolute; /* Use absolute to position the background */
+            right: 0; /* Position it on the right */
+            top: 0;
+            z-index: -1; /* Ensure it's behind the content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bg-left::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+            z-index: -1; /* Ensure it's below the content */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #EAEAEA;
+        }
+
+        header {
+            background-color: #16AE5C;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            margin: 0;
+        }
+
+        header img {
+            height: 70px;
+            margin-right: 20px;
+        }
+
+        header span {
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'Montserrat', sans-serif;
+            color: black;
+            line-height: 70px;
+        }
+
+        /* Main container as a flexbox to center its children */
+        .main-container {
+            display: flex;
+            justify-content: center; /* Centers horizontally */
+            align-items: center; /* Centers vertically */
+            margin-top: 20px;
+            width: 90%;
+            margin: 20px auto;
+            flex-wrap: wrap; /* Allow wrapping for smaller screens */
+        }
+
+        /* Slideshow container and positioning */
+        .slideshow-container {
+            flex: 1;
+            height: 500px; /* Increased height for slideshow */
+            margin-right: 20px; /* Less margin for the slideshow */
+            position: relative;
+            left: -10px; /* Slight adjustment to move slideshow left */
+            max-width: 100%; /* Ensure it doesn’t overflow on small screens */
+        }
+
+        .slideshow-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* Ensure images are hidden initially */
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Fade transition */
+            position: absolute;
+        }
+
+        /* Reservation container box */
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 480px; /* Adjusted width for reservation box */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-left: 20px; /* Adjusted to align better with slideshow */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 400px; /* Adjust height to fit content */
+            padding-bottom: 40px; /* Adjusted bottom padding */
+        }
+
+        h1 {
+            color: #16AE5C;
+        }
+
+        select, button {
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 16px;
+            width: 90%; /* Wider form elements */
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #room-selection {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #16AE5C;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #13994e;
+        }
+
+        /* Media Queries for responsive design */
+        @media (max-width: 768px) {
+            .bg-left {
+                width: 100%; /* Full width on smaller screens */
+                height: 60vh; /* Reduced height for smaller screens */
+                top: 0;
+            }
+
+            .main-container {
+                flex-direction: column; /* Stack the slideshow and reservation box */
+                align-items: center; /* Center elements */
+            }
+
+            .slideshow-container {
+                height: 300px; /* Adjust slideshow height */
+                margin-right: 0; /* Remove right margin */
+            }
+
+            .container {
+                margin-left: 0; /* Remove left margin */
+                margin-top: 20px; /* Add some space on top */
+                max-width: 100%; /* Allow container to scale */
+            }
+        }
+
+        @media (max-width: 480px) {
+            header span {
+                font-size: 24px; /* Smaller header font on small screens */
+            }
+
+            h1 {
+                font-size: 24px; /* Smaller title for reservation box */
+            }
+
+            select, button {
+                width: 80%; /* Adjust width of select and button for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="img/dlsulogo.png" alt="DLSU Logo">
+        <span>AnimoHub</span>
+    </header>
+
+    <div class="bg-left"></div>
+
+    <div class="main-container">
+        <!-- Slideshow Container -->
+        <div class="slideshow-container">
+            <img src="img/conference-room1.jpg" alt="Conference Room 1" class="slide">
+            <img src="img/conference-room2.jpg" alt="Conference Room 2" class="slide">
+            <img src="img/conference-room3.jpg" alt="Conference Room 3" class="slide">
+            <img src="img/conference-room4.jpg" alt="Conference Room 4" class="slide">
+        </div>
+
+        <!-- Reservation Container -->
+        <div class="container">
+            <h1>Reserve a Conference Room</h1>
+            <label for="room-selection">Select Room:</label>
+            <select id="room-selection"></select>
+            
+            <label for="timeslot-selection">Select Timeslot:</label>
+            <select id="timeslot-selection">
+                <option value="7:30 AM - 9:00 AM">7:30 AM - 9:00 AM</option>
+                <option value="9:15 AM - 10:45 AM">9:15 AM - 10:45 AM</option>
+                <option value="11:00 AM - 12:30 PM">11:00 AM - 12:30 PM</option>
+                <option value="12:45 PM - 2:15 PM">12:45 PM - 2:15 PM</option>
+                <option value="2:30 PM - 4:00 PM">2:30 PM - 4:00 PM</option>
+                <option value="4:15 PM - 5:45 PM">4:15 PM - 5:45 PM</option>
+                <option value="6:00 PM - 7:30 PM">6:00 PM - 7:30 PM</option>
+                <option value="7:45 PM - 9:15 PM">7:45 PM - 9:15 PM</option>
+            </select>
+            
+            <button onclick="submitReservation()">Reserve</button>
+        </div>
+    </div>
+    
+    <script>
+        // Generate room numbers for Conference Rooms (e.g., C101 - C110)
+        const roomSelect = document.getElementById("room-selection");
+        for (let i = 101; i <= 110; i++) {
+            let option = document.createElement("option");
+            option.value = `C${i}`;
+            option.textContent = `Conference Room C${i}`;
+            roomSelect.appendChild(option);
+        }
+
+        function submitReservation() {
+            const room = document.getElementById("room-selection").value;
+            const timeslot = document.getElementById("timeslot-selection").value;
+            alert(`Reservation confirmed for ${room} at ${timeslot}`);
+        }
+
+        // Slideshow functionality with fading transition
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.slideshow-container .slide');
+        
+        function showSlides() {
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.opacity = 0; // Hide all slides
+            }
+            slideIndex++;
+            if (slideIndex > slides.length) { slideIndex = 1 }    
+            slides[slideIndex - 1].style.display = "block"; // Show the current slide
+            setTimeout(() => {
+                slides[slideIndex - 1].style.opacity = 1;  // Fade in the current slide
+            }, 100);  // Slight delay for transition
+            setTimeout(showSlides, 5000); // Change image every 5 seconds
+        }
+
+        showSlides(); // Initialize slideshow
+    </script>
+</body>
+</html>
