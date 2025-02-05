@@ -6,7 +6,6 @@
     --text-color: #202020;
     --input-color: #757575;
     --form-color: #eaeaea;
-    --white: #fff;
 }
 
 * {
@@ -63,7 +62,7 @@ body::before {
 .wrapper {
     grid-column: 2 / 3; 
     box-sizing: border-box;
-    background-color: var(--base-color);
+    background-color: var(--accent-color);
     height: 100vh;
     width: 100%; 
     padding: 20px; 
@@ -114,7 +113,7 @@ body::before {
 }
 
 .tab-button:hover {
-    background-color: var(--form-color);
+    background-color: var(--base-color);
     color: var(--accent-color); 
 }
 
@@ -174,7 +173,7 @@ form > div > input {
     font-size: 1.2rem;
     border: 1px solid var(--input-color);
     border-radius: 5px;
-    background-color: var(--white);
+    background-color: white;
     color: var(--input-color);
 }
 
