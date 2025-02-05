@@ -5,7 +5,6 @@ const body = document.body;
 //restricted perms
 const reserveRoomBtn = document.getElementById('reserveRoomBtn');
 const addRoomBtn = document.getElementById('addRoomBtn');
-const approveAccBtn = document.getElementById('approveAccBtn');
 
 function getAccountTier() {
   // TODO: back-end for getting account tiers
@@ -25,7 +24,6 @@ function checkAccountTier() {
           break;
       case 4:
           addRoomBtn.style.display = 'block';
-          approveAccBtn.style.display = 'block';
           reserveRoomBtn.style.display = 'block';
           break;
   }
@@ -114,52 +112,3 @@ document.getElementById('addRoomBtn').addEventListener('click', () => {
       <iframe src="add-update-room.html" width="100%" height="600px" style="border:none;"></iframe>
     `;
 });
-document.getElementById('approveAccBtn').addEventListener('click', () => {
-  // example data
-  const accounts = [
-      { username: 'user1', email: 'user1@dlsu.edu.ph', tier: 2 },
-      { username: 'user2', email: 'user2@dlsu.edu.ph', tier: 3 },
-      { username: 'user3', email: 'user3@dlsu.edu.ph', tier: 4 }
-  ];
-
-  let accountRows = accounts.map((account, index) => `
-      <tr id="account-${index}">
-          <td>${account.username}</td>
-          <td>${account.email}</td>
-          <td>${account.tier}</td>
-          <td>
-              <button onclick="approveAccount(${index})">Approve</button>
-              <button onclick="disapproveAccount(${index})">Disapprove</button>
-          </td>
-      </tr>
-  `).join('');
-
-  mainContent.innerHTML = `
-    <h2>Approve Accounts</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Account Tier Requested</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${accountRows}
-      </tbody>
-    </table>
-  `;
-});
-
-function approveAccount(index) {
-  document.getElementById(`account-${index}`).remove();
-  // TODO: add logic for approving account in the backend
-  alert('Account approved');
-}
-
-function disapproveAccount(index) {
-  document.getElementById(`account-${index}`).remove();
-  // TODO: add logic for disapproving account in the backend
-  alert('Account disapproved');
-}
