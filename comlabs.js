@@ -133,13 +133,13 @@ function OnSubmitButtonClicked() {
        document.getElementById("submit-button").textContent = 'Back';
     }
     
-    else {
-        resetDate();
-        resetTime();
-        resetRoom();
-        resetSeat();
-        document.getElementById("submit-button").textContent = 'Submit';
-    }
+    // else {
+    //     resetDate();
+    //     resetTime();
+    //     resetRoom();
+    //     resetSeat();
+    //     document.getElementById("submit-button").textContent = 'Submit';
+    // }
 
 }
 
@@ -152,4 +152,14 @@ function checkForm(event) {
         event.preventDefault(); 
     }
 }
+
+// function makeOptionsForSeat(num) {
+//     var select = document.getElementById("reserve-seat");
+//     for(var i = 0; i < num; i++) {
+//         var child = document.createElement("option");
+//         child.value = (i)
+//         child.textContent(i+1);
+//         select.appendChild(child);
+//     }
+// }
 
