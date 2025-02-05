@@ -110,8 +110,8 @@ document.getElementById('reserveComputerBtn').addEventListener('click', () => {
 });
 document.getElementById('addRoomBtn').addEventListener('click', () => {
     mainContent.innerHTML = `
-      <h2>Add/Edit Rooms</h2>
-      <p>Redirecting to admin editor page...</p>
+      <h2>Reserve a Room</h2>
+      <iframe src="add-update-room.html" width="100%" height="600px" style="border:none;"></iframe>
     `;
 });
 document.getElementById('approveAccBtn').addEventListener('click', () => {
