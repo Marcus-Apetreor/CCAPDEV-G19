@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Reservations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Room Reservations</h2>
+        
+        <!-- Add Reservation Button -->
+        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Add Reservation</button>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Reservation ID</th>
+                    <th>Guest Name</th>
+                    <th>Room Number</th>
+                    <th>Date</th>
+                    <th>Time Block</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="reservationTable">
+                <!-- Dynamic reservations will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Reservation Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addModalLabel">Add Reservation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addForm">
+                        <div class="mb-3">
+                            <label for="addName" class="form-label">Guest Name</label>
+                            <input type="text" class="form-control" id="addName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addRoom" class="form-label">Room Number</label>
+                            <input type="text" class="form-control" id="addRoom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="addDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTimeBlock" class="form-label">Time Block</label>
+                            <select class="form-control" id="addTimeBlock" required></select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Reservation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Reservation Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Reservation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editId">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label">Guest Name</label>
+                            <input type="text" class="form-control" id="editName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRoom" class="form-label">Room Number</label>
+                            <input type="text" class="form-control" id="editRoom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="editDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTimeBlock" class="form-label">Time Block</label>
+                            <select class="form-control" id="editTimeBlock" required></select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let reservations = [
+            { id: 10001, name: "Andre Marco", room: "GK1191", date: "2025-02-06", timeBlock: "16:00 - 17:30" },
+            { id: 10002, name: "Ewan Escano", room: "A211", date: "2025-02-08", timeBlock: "07:30 - 09:00" },
+            { id: 10003, name: "Michael Jordan", room: "A101", date: "2025-02-10", timeBlock: "09:15 - 10:45" },
+            { id: 10004, name: "Lebron James", room: "GK202", date: "2025-02-12", timeBlock: "11:00 - 12:30" },
+            { id: 10005, name: "Bruce Wayne", room: "A303", date: "2025-02-14", timeBlock: "14:30 - 15:45" }
+        ];
+
+        const timeBlocks = [
+            "07:30 - 09:00",
+            "09:15 - 10:45",
+            "11:00 - 12:30",
+            "12:45 - 14:15",
+            "14:30 - 15:45",
+            "16:00 - 17:30",
+            "17:45 - 19:15",
+            "19:30 - 21:00"
+        ];
+
+        function populateTimeBlocks(selectElement) {
+            selectElement.innerHTML = "";
+            timeBlocks.forEach(block => {
+                let option = document.createElement("option");
+                option.value = block;
+                option.textContent = block;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function renderReservations() {
+            const tableBody = document.getElementById("reservationTable");
+            tableBody.innerHTML = "";
+            reservations.forEach((res, index) => {
+                const row = `
+                    <tr>
+                        <td>${res.id}</td>
+                        <td>${res.name}</td>
+                        <td>${res.room}</td>
+                        <td>${res.date}</td>
+                        <td>${res.timeBlock}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editReservation(${index})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteReservation(${index})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function addReservation(event) {
+            event.preventDefault();
+            const newReservation = {
+                id: reservations.length > 0 ? reservations[reservations.length - 1].id + 1 : 10001,
+                name: document.getElementById("addName").value,
+                room: document.getElementById("addRoom").value,
+                date: document.getElementById("addDate").value,
+                timeBlock: document.getElementById("addTimeBlock").value
+            };
+            reservations.push(newReservation);
+            renderReservations();
+            bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+        }
+
+        document.getElementById("addForm").addEventListener("submit", addReservation);
+
+        function deleteReservation(index) {
+            if (confirm("Are you sure you want to delete this reservation?")) {
+                reservations.splice(index, 1);
+                renderReservations();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            populateTimeBlocks(document.getElementById("addTimeBlock"));
+            renderReservations();
+        });
+
+    </script>
+</body>
+</html>
