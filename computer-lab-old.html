@@ -1,0 +1,378 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Seat Reservation</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative; /* Ensure stacking context */
+    overflow-x: hidden; /* Disable horizontal scrolling */
+}
+
+.bg-left {
+    background-image: url('img/goks.jpg');
+    background-size: cover; 
+    background-position: center; 
+    width: 100%; /* Use 100% to make sure it doesn't exceed the viewport width */
+    height: 100vh; 
+    position: absolute; /* Use absolute to position the background */
+    left: 0; 
+    top: 0; 
+    z-index: -1; /* Ensure it's behind the content */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bg-left::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+    z-index: -1; /* Ensure it's below the content */
+}
+
+
+        header {
+            background-color: #16AE5C;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            margin: 0;
+        }
+    
+        header img {
+            height: 70px;
+            margin-right: 20px;
+            margin-left: 20px;
+        }
+    
+        header span {
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'Montserrat', sans-serif;
+            color: black;
+            line-height: 70px;
+        }
+
+        .main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 20px;
+    gap: 20px;
+    width: 100%;
+    max-width: 1400px; /* Ensure content is restricted to this max width */
+    margin-left: auto;
+    margin-right: auto;
+    flex-wrap: nowrap;
+    position: relative; /* Ensure content stays above bg-left */
+}
+
+
+.container {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 300px; /* Fixed width for consistency */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    max-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: auto;
+    margin-bottom: auto;
+    
+}
+
+.seat-container {
+    flex: 1; /* Allows it to expand */
+    min-width: 350px; /* Prevents it from shrinking too much */
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.slideshow {
+    flex: 1; /* Makes it take equal space */
+    max-width: 500px; /* Ensures it doesn't shrink too much */
+    height: 300px; 
+    overflow: hidden;
+    position: relative;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
+
+}
+
+.slides img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+.slides img.active {
+    opacity: 1;
+}
+
+
+        h1 {
+            color: #16AE5C;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin: 15px 0 5px;
+            width: 100%;
+        }
+
+        select, button {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            display: block;
+            margin: 5px 0 15px;
+            background-color: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #16AE5C;
+            box-shadow: 0 0 5px rgba(22, 174, 92, 0.5);
+        }
+
+        button {
+            background-color: #16AE5C;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #13994e;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+      
+
+        .front-class {
+            background-color: #16AE5C;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            width: 100%; /* Set width to match seat grid */
+            max-width: fit-content; /* Ensures it shrinks to fit */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-row-gap: 20px; /* Gap between rows */
+            grid-column-gap: 35px; /* Gap between columns */
+            margin-top: 20px;
+            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .seat {
+            width: 50px; /* Increased size for each seat */
+            height: 50px; /* Increased size for each seat */
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px; /* Increased font size for seat labels */
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .seat:hover {
+            background-color: #b3b3b3;
+        }
+
+        .seat.selected {
+            background-color: #16AE5C;
+            color: white;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <img src="img/dlsulogo.png" alt="DLSU Logo">
+        <span>AnimoHub</span>
+    </header>
+
+    <div class="bg-left"></div>
+    
+
+    <div class="main-container">
+        <div class="container">
+            <h1>Reserve a Lab Seat</h1>
+            <label for="seat-selection">Select Room:</label>
+            <select id="seat-selection"></select>
+            
+            <label for="start-time">Select Start Time:</label>
+            <select id="start-time"></select>
+
+            <label for="end-time">Select End Time:</label>
+            <select id="end-time"></select>
+
+            <button onclick="submitReservation()">Reserve</button>
+
+            <p id="error-message" class="error-message"></p>
+        </div>
+
+        <div class="seat-container">
+            <h1>Seat Selection</h1>
+            <div class="front-class">Front of the class</div>
+            <div class="seat-grid" id="seat-grid"></div>
+        </div>
+        <div class="slideshow">
+            <div class="slides">
+                <img src="img/lab1.png" class="active" alt="Lab 1">
+                <img src="img/lab2.png" alt="Lab 2">
+                <img src="img/lab3.jpg" alt="Lab 3">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const seatSelect = document.getElementById("seat-selection");
+        for (let i = 101; i <= 120; i++) {
+            let option = document.createElement("option");
+            option.value = `L${i}`;
+            option.textContent = `Lab L${i}`;
+            seatSelect.appendChild(option);
+        }
+
+          // Slideshow functionality
+          let slideIndex = 0;
+            const slides = document.querySelectorAll(".slides img");
+            function showSlides() {
+                slides.forEach((slide, index) => {
+                    slide.classList.remove("active");
+                });
+                slides[slideIndex].classList.add("active");
+                slideIndex = (slideIndex + 1) % slides.length;
+            }
+            setInterval(showSlides, 3000);
+
+        function generateTimeOptions(selectElement, startHour, startMinute) {
+            const endHour = 21, endMinute = 30;
+            let currentHour = startHour;
+            let currentMinute = startMinute;
+            while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
+                let ampm = currentHour < 12 ? "AM" : "PM";
+                let displayHour = currentHour % 12 || 12;
+                let displayMinute = currentMinute.toString().padStart(2, '0');
+                let timeValue = `${displayHour}:${displayMinute} ${ampm}`;
+                let option = document.createElement("option");
+                option.value = timeValue;
+                option.textContent = timeValue;
+                selectElement.appendChild(option);
+                currentMinute += 30;
+                if (currentMinute === 60) {
+                    currentMinute = 0;
+                    currentHour++;
+                }
+            }
+        }
+
+        generateTimeOptions(document.getElementById("start-time"), 7, 30);
+        generateTimeOptions(document.getElementById("end-time"), 8, 0);
+        document.getElementById("end-time").value = "8:00 AM";
+
+        function convertToDate(timeStr) {
+    let [time, modifier] = timeStr.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+    
+    if (modifier === "PM" && hours !== 12) {
+        hours += 12;
+    } else if (modifier === "AM" && hours === 12) {
+        hours = 0; // Convert 12 AM to 0 hours
+    }
+
+    return new Date(2000, 0, 1, hours, minutes); // Dummy date for comparison
+}
+
+function submitReservation() {
+    const selectedSeats = Array.from(document.querySelectorAll(".seat.selected")).map(seat => seat.textContent);
+    const startTime = document.getElementById("start-time").value;
+    const endTime = document.getElementById("end-time").value;
+    const errorMessage = document.getElementById("error-message");
+
+    if (selectedSeats.length === 0) {
+        errorMessage.textContent = "Error: Please select at least one seat.";
+        return;
+    }
+
+    if (convertToDate(endTime) <= convertToDate(startTime)) {
+        errorMessage.textContent = "Error: End time must be later than start time.";
+        return;
+    }
+
+    errorMessage.textContent = "";  
+    alert(`Reservation confirmed for ${selectedSeats.join(", ")} from ${startTime} to ${endTime}`);
+}
+
+        const seatGrid = document.getElementById("seat-grid");
+        for (let i = 1; i <= 25; i++) {
+            let seatBox = document.createElement("div");
+            seatBox.classList.add("seat");
+            seatBox.textContent = `S${i}`;
+            seatBox.onclick = function() {
+                seatBox.classList.toggle("selected");
+            };
+            seatGrid.appendChild(seatBox);
+        }
+    </script>
+</body>
+</html> -->

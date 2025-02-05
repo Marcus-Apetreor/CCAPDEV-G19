@@ -102,12 +102,6 @@ document.getElementById('reserveRoomBtn').addEventListener('click', () => {
       <iframe src="roomreservation.html" width="100%" height="600px" style="border:none;"></iframe>
     `;
 });
-document.getElementById('reserveComputerBtn').addEventListener('click', () => {
-    mainContent.innerHTML = `
-      <h2>Reserve a Computer</h2>
-      <p>Redirecting to the computer reservation page...</p>
-    `;
-});
 document.getElementById('addRoomBtn').addEventListener('click', () => {
     mainContent.innerHTML = `
       <h2>Add/Update Rooms</h2>
