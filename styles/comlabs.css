@@ -39,7 +39,7 @@ body {
 
 .school-logo {
     /* padding: 10px; */
-    background-image: url("assets-/logo-dlsu.png");
+    background-image: url("../assets-/logo-dlsu.png");
     background-size: contain;
     width: 45px;
     background-repeat: no-repeat;
@@ -48,7 +48,7 @@ body {
 .content-background {
     position: absolute;
     inset: 0;
-    background-image: url("assets-/1DLSU-at-duskE-1024x416.jpg");
+    background-image: url("../assets-/1DLSU-at-duskE-1024x416.jpg");
     filter:blur(3px);
     z-index: -1;
     background-size: cover;
@@ -143,7 +143,7 @@ h6 {
 
 
 #temporary-seatplan {
-    background-image: url("assets-/seat-plan-temp.png");
+    background-image: url("../assets-/seat-plan-temp.png");
     background-size: contain;
     width: 350px;
     height: 350px;

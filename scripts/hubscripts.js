@@ -64,11 +64,11 @@ document.getElementById('userProfileBtn').addEventListener('click', () => {
 document.getElementById('myReservationsBtn').addEventListener('click', () => {
   // example data
   const reservations = [
-      { roomNumber: '101', seat: 'C2R5', timeSlot: '10:30 AM - 11:00 AM' },
-      { roomNumber: '102', seat: 'C3R2', timeSlot: '11:30 AM - 12:00 PM' },
-      { roomNumber: '103', seat: 'C1R1', timeSlot: '12:30 PM - 01:00 PM' },
-      { roomNumber: '102', seat: 'C3R5', timeSlot: '1:30 AM - 2:00 PM' },
-      { roomNumber: '103', seat: 'C1R2', timeSlot: '2:30 PM - 3:00 PM' }
+      { roomNumber: '101', seat: '1', timeSlot: '10:30 AM - 11:00 AM' },
+      { roomNumber: '102', seat: '3', timeSlot: '11:30 AM - 12:00 PM' },
+      { roomNumber: '103', seat: '5', timeSlot: '12:30 PM - 01:00 PM' },
+      { roomNumber: '102', seat: '2', timeSlot: '1:30 AM - 2:00 PM' },
+      { roomNumber: '103', seat: '6', timeSlot: '2:30 PM - 3:00 PM' }
   ];
 
   let tableRows = reservations.map(reservation => `
