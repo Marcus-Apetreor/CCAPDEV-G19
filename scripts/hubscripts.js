@@ -99,7 +99,7 @@ document.getElementById('myReservationsBtn').addEventListener('click', () => {
 document.getElementById('reserveRoomBtn').addEventListener('click', () => {
     mainContent.innerHTML = `
       <h2>Reserve a Room</h2>
-      <p>Redirecting to the room reservation page...</p>
+      <iframe src="roomreservation.html" width="100%" height="600px" style="border:none;"></iframe>
     `;
 });
 document.getElementById('reserveComputerBtn').addEventListener('click', () => {
@@ -112,13 +112,11 @@ document.getElementById('addRoomBtn').addEventListener('click', () => {
     mainContent.innerHTML = `
       <h2>Add/Edit Rooms</h2>
       <p>Redirecting to admin editor page...</p>
-      <!-- Add more reserve room content here -->
     `;
 });
 document.getElementById('approveAccBtn').addEventListener('click', () => {
     mainContent.innerHTML = `
       <h2>Approve Accounts</h2>
       <p>Here are the list of accounts pending for approval of perms...</p>
-      <!-- Add more reserve room content here -->
     `;
 });
