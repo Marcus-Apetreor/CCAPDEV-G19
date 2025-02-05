@@ -115,8 +115,51 @@ document.getElementById('addRoomBtn').addEventListener('click', () => {
     `;
 });
 document.getElementById('approveAccBtn').addEventListener('click', () => {
-    mainContent.innerHTML = `
-      <h2>Approve Accounts</h2>
-      <p>Here are the list of accounts pending for approval of perms...</p>
-    `;
+  // example data
+  const accounts = [
+      { username: 'user1', email: 'user1@dlsu.edu.ph', tier: 2 },
+      { username: 'user2', email: 'user2@dlsu.edu.ph', tier: 3 },
+      { username: 'user3', email: 'user3@dlsu.edu.ph', tier: 4 }
+  ];
+
+  let accountRows = accounts.map((account, index) => `
+      <tr id="account-${index}">
+          <td>${account.username}</td>
+          <td>${account.email}</td>
+          <td>${account.tier}</td>
+          <td>
+              <button onclick="approveAccount(${index})">Approve</button>
+              <button onclick="disapproveAccount(${index})">Disapprove</button>
+          </td>
+      </tr>
+  `).join('');
+
+  mainContent.innerHTML = `
+    <h2>Approve Accounts</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Account Tier Requested</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${accountRows}
+      </tbody>
+    </table>
+  `;
 });
+
+function approveAccount(index) {
+  document.getElementById(`account-${index}`).remove();
+  // TODO: add logic for approving account in the backend
+  alert('Account approved');
+}
+
+function disapproveAccount(index) {
+  document.getElementById(`account-${index}`).remove();
+  // TODO: add logic for disapproving account in the backend
+  alert('Account disapproved');
+}
