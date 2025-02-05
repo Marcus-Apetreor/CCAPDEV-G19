@@ -1,0 +1,158 @@
+:root {
+    --primary-color: #ffffff;
+    --secondary-color: #31a959;
+    --background-color: #e9e7df;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Noto Sans", serif;
+    
+}
+
+
+.header {
+    background-color: var(--secondary-color);
+    display: flex;
+    padding: 10px;
+    padding-left: 100px;
+}
+
+.primary-color {
+    color: var(--primary-color);
+}
+
+.secondary-color {
+    color: var(--secondary-color);
+}
+
+.website-name {
+    /* padding: 5px 5px 5px 20px; */
+    padding-left: 10px;
+}
+
+
+.school-logo {
+    /* padding: 10px; */
+    background-image: url("assets-/logo-dlsu.png");
+    background-size: contain;
+    width: 45px;
+    background-repeat: no-repeat;
+}
+
+.content-background {
+    position: absolute;
+    inset: 0;
+    background-image: url("assets-/1DLSU-at-duskE-1024x416.jpg");
+    filter:blur(3px);
+    z-index: -1;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position:fixed;
+}
+
+.content {
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: var(--background-color);
+    background-size: contain;
+    height: 88vh;
+    border-radius: 5px;
+    padding: 20px;
+    
+}
+
+.subtitle {
+    /* margin: 10px; */
+    padding: 15px;
+    background-color:#b1d05c;
+}
+
+h2 {
+    font-weight: bold;
+    font-size: 40px;
+}
+
+h3 {
+    font-weight: 350px;
+    font-size: 27px;
+    color: #373737
+}
+
+#text-desc {
+    margin-top: 3%;
+    font-size: 22px;
+    margin-left: 3%;
+}
+
+h6 {
+    font-size: 18px;
+    color: #212121;
+}
+
+.input-desc {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+
+.input-border, #submit-button {
+    font-size: 16px;
+    padding: 5px;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-left: 5%;
+    /* margin: 10px 5%; */
+}
+
+#submit-button {
+    background-color: #31a959;
+    /* margin-top: 3%; */
+    margin-left: 15%;
+    color:#ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#submit-button:hover {
+    background-color: #2b894a; 
+}
+
+
+.info {
+    font-weight:lighter;
+}
+
+.asterisk {
+    color: red;
+}
+
+.input {
+    margin-left: 5%;
+    margin-top: 3%;
+    display:flex;
+}
+
+
+#temporary-seatplan {
+    background-image: url("assets-/seat-plan-temp.png");
+    background-size: contain;
+    width: 350px;
+    height: 350px;
+    float: right;
+    margin-left: 25%;
+    color:#191919;
+    text-align: center;
+    padding-top: 10%;
+    font-weight: bold;
+    position:fixed;
+    border-radius: 5px;
+}
