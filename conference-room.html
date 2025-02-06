@@ -252,13 +252,12 @@
             alert(`Reservation confirmed for ${room} at ${timeslot}`);
         }
 
-        // Slideshow functionality with fading transition
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slideshow-container .slide');
         
         function showSlides() {
             for (let i = 0; i < slides.length; i++) {
-                slides[i].style.opacity = 0; // Hide all slides
+                slides[i].style.opacity = 0;
             }
             slideIndex++;
             if (slideIndex > slides.length) { slideIndex = 1 }    
