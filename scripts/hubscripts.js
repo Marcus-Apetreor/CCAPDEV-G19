@@ -5,6 +5,7 @@ const body = document.body;
 //restricted perms
 const reserveRoomBtn = document.getElementById('reserveRoomBtn');
 const addRoomBtn = document.getElementById('addRoomBtn');
+const reserveComputerBtn = document.getElementById('reserveComputerBtn');
 
 function getAccountTier() {
   // TODO: back-end for getting account tiers
@@ -15,6 +16,7 @@ function checkAccountTier() {
   const accountTier = getAccountTier();
   switch (accountTier) {
       case 1:
+          reserveComputerBtn.style.display = 'block';
           break;
       case 2:
           reserveRoomBtn.style.display = 'block';
@@ -100,6 +102,11 @@ document.getElementById('reserveRoomBtn').addEventListener('click', () => {
     mainContent.innerHTML = `
       <h2>Reserve a Room</h2>
       <iframe src="roomreservation.html" width="100%" height="600px" style="border:none;"></iframe>
+    `;
+});
+document.getElementById('reserveComputerBtn').addEventListener('click', () => {
+    mainContent.innerHTML = `<h2>Reserve a Computer</h2>
+      <iframe src="computer-lab.html" width="100%" height="600px" style="border:none;"></iframe>
     `;
 });
 document.getElementById('addRoomBtn').addEventListener('click', () => {
