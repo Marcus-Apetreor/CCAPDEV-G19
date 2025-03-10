@@ -254,7 +254,8 @@ select:focus, input[type="date"]:focus {
             <select id="room-selection"></select>
             
             <label for="date-selection">Select Date:</label>
-            <input type="date" id="date-selection">
+            <input type="date" id="date-selection" min="">
+            
 
             <label for="timeslot-selection">Select Timeslot:</label>
             <select id="timeslot-selection">
@@ -268,9 +269,10 @@ select:focus, input[type="date"]:focus {
                 <option value="7:45 PM - 9:15 PM">7:45 PM - 9:15 PM</option>
             </select>
             
-            <button onclick="submitReservation()">Reserve</button>
+            <button id="reserve-btn">Reserve</button>
         </div>
     </div>
+    <script src="scripts/conferenceroom.js"></script>
     
     <script>
         // Generate room numbers for Conference Rooms (e.g., C101 - C110)
@@ -282,12 +284,7 @@ select:focus, input[type="date"]:focus {
             roomSelect.appendChild(option);
         }
 
-        function submitReservation() {
-            const room = document.getElementById("room-selection").value;
-            const timeslot = document.getElementById("timeslot-selection").value;
-            alert(`Reservation confirmed for ${room} at ${timeslot}`);
-        }
-
+       
         let slideIndex = 0;
         const slides = document.querySelectorAll('.slideshow-container .slide');
         
