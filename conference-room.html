@@ -125,6 +125,42 @@
             padding-bottom: 40px; /* Adjusted bottom padding */
         }
 
+           /* Style for dropdowns and date picker */
+select, input[type="date"] {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    width: 90%; /* Match width of other inputs */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    cursor: pointer;
+}
+
+/* Ensure the date input has consistent text alignment */
+input[type="date"] {
+    appearance: none; /* Remove default browser styles */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-align: center;
+}
+
+/* Adjust hover and focus behavior for consistency */
+select:hover, input[type="date"]:hover {
+    border-color: #16AE5C;
+}
+
+select:focus, input[type="date"]:focus {
+    outline: none;
+    border-color: #13994e;
+    box-shadow: 0 0 5px rgba(19, 153, 78, 0.5);
+}
+
+
         h1 {
             color: #16AE5C;
         }
@@ -198,10 +234,7 @@
     </style>
 </head>
 <body>
-    <header>
-        <img src="img/dlsulogo.png" alt="DLSU Logo">
-        <span>AnimoHub</span>
-    </header>
+ 
 
     <div class="bg-left"></div>
 
@@ -220,6 +253,9 @@
             <label for="room-selection">Select Room:</label>
             <select id="room-selection"></select>
             
+            <label for="date-selection">Select Date:</label>
+            <input type="date" id="date-selection">
+
             <label for="timeslot-selection">Select Timeslot:</label>
             <select id="timeslot-selection">
                 <option value="7:30 AM - 9:00 AM">7:30 AM - 9:00 AM</option>

@@ -7,6 +7,22 @@ const reserveRoomBtn = document.getElementById('reserveRoomBtn');
 const addRoomBtn = document.getElementById('addRoomBtn');
 const reserveComputerBtn = document.getElementById('reserveComputerBtn');
 
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+const usernameElement = document.querySelector(".username"); 
+
+
+usernameElement.textContent = user.username;
+
+
+if (user) {
+    console.log("User logged in:", user);
+    console.log("Username:", user.username);
+    console.log("Email:", user.email);
+    console.log("Tier:", user.tier);
+}
+
 function getAccountTier() {
   // TODO: back-end for getting account tiers
   return 4;
