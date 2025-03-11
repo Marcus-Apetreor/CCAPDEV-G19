@@ -96,32 +96,198 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post("/reserve", async (req, res) => {
+app.post("/check-reservation", async (req, res) => {
     try {
-        const { room, roomType, date, timeslot, seat, username } = req.body;
+        const { room, roomType, date, timeslot, seat, userTier } = req.body;
 
-        // Validate required fields
-        if (!room || !roomType || !date || !timeslot || !username) {
+        if (!room || !roomType || !date || !timeslot || userTier === undefined) {
             return res.status(400).json({ error: "All required fields must be filled" });
         }
 
-        // Check if the room is already booked
-        const existingReservation = await Reservation.findOne({ room, date, timeslot });
-
-        if (existingReservation) {
-            return res.status(400).json({ error: "Room is already reserved at this date and timeslot" });
+        function parseTime(timeString) {
+            let [time, modifier] = timeString.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+            return hours * 60 + minutes;
         }
 
-        // Create new reservation
-        const newReservation = new Reservation({ room, roomType, date, timeslot, seat: seat || null, username });
+        const newStart = parseTime(timeslot.split(" - ")[0]);
+        const newEnd = parseTime(timeslot.split(" - ")[1]);
+
+        let conflictingReservations = await Reservation.find({ room, date, seat });
+
+        for (let reservation of conflictingReservations) {
+            const existingStart = parseTime(reservation.timeslot.split(" - ")[0]);
+            const existingEnd = parseTime(reservation.timeslot.split(" - ")[1]);
+
+            if (!(newEnd <= existingStart || newStart >= existingEnd)) {
+                const existingUser = await User.findOne({ username: reservation.username });
+
+                if (!existingUser) {
+                    console.warn(`Warning: User ${reservation.username} not found.`);
+                    continue;
+                }
+
+                const existingUserTier = existingUser.tier;
+
+                // **Enforce Tier-Based Overwriting Rules**
+                const canOverwrite = 
+                    (userTier === 3 && existingUserTier <= 2) ||  // Tier 3 can overwrite Tier 1 and 2
+                    (userTier === 4 && existingUserTier <= 3);   // Tier 4 can overwrite Tier 1, 2, and 3
+
+                if (canOverwrite) {
+                    return res.status(200).json({
+                        message: `This seat is already reserved by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                        requireConfirmation: true
+                    });
+                } else {
+                    return res.status(400).json({ error: "Seat is already reserved within this timeslot." });
+                }
+            }
+        }
+
+        res.status(200).json({ message: "No conflicts found. You can proceed with the reservation." });
+    } catch (error) {
+        console.error("Check Reservation Error:", error);
+        res.status(500).json({ error: "Server error, please try again later" });
+    }
+});
+
+
+
+app.post("/reserve", async (req, res) => {
+    try {
+        const { room, roomType, date, timeslot, seat, username, userTier, confirmOverwrite } = req.body;
+
+        if (!room || !roomType || !date || !timeslot || !username || userTier === undefined) {
+            return res.status(400).json({ error: "All required fields must be filled" });
+        }
+
+        function parseTime(timeString) {
+            let [time, modifier] = timeString.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+        }
+
+        if (roomType === "complab") {
+            const newStart = parseTime(timeslot.split(" - ")[0]);
+            const newEnd = parseTime(timeslot.split(" - ")[1]);
+
+            let conflictingReservations = await Reservation.find({ room, date, seat });
+
+            for (let reservation of conflictingReservations) {
+                const existingStart = parseTime(reservation.timeslot.split(" - ")[0]);
+                const existingEnd = parseTime(reservation.timeslot.split(" - ")[1]);
+
+                if (!(newEnd <= existingStart || newStart >= existingEnd)) {
+                    const existingUser = await User.findOne({ username: reservation.username });
+
+                    if (!existingUser) {
+                        console.warn(`Warning: User ${reservation.username} not found.`);
+                        continue;
+                    }
+
+                    const existingUserTier = existingUser.tier;
+
+                    // **Enforce Tier-Based Overwriting Rules**
+                    const canOverwrite = 
+                        (userTier === 3 && existingUserTier <= 2) ||  // Tier 3 can overwrite Tier 1 and 2
+                        (userTier === 4 && existingUserTier <= 3);   // Tier 4 can overwrite Tier 1, 2, and 3
+    
+                    if (canOverwrite) {
+                        return res.status(200).json({
+                            message: `A seat is already reserved by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                            requireConfirmation: true
+                        });
+                    } else {
+                        return res.status(400).json({ error: "Seat is already reserved within this timeslot." });
+                    }
+                }
+            }
+        } else {
+            let existingReservation = await Reservation.findOne({ room, date, timeslot });
+
+            if (existingReservation) {
+                const existingUser = await User.findOne({ username: existingReservation.username });
+
+                if (!existingUser) {
+                    console.warn(`Warning: User ${existingReservation.username} not found.`);
+                    return res.status(400).json({ error: "Room is already reserved at this date and timeslot." });
+                }
+
+                const existingUserTier = existingUser.tier;
+
+                if (existingUserTier < userTier) {
+                    if (!confirmOverwrite) {
+                        return res.status(200).json({
+                            message: `This room is already reserved by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                            requireConfirmation: true
+                        });
+                    } else {
+                        await Reservation.deleteOne({ _id: existingReservation._id });
+                    }
+                } else {
+                    return res.status(400).json({ error: "Room is already reserved at this date and timeslot." });
+                }
+            }
+        }
+
+        const newReservation = new Reservation({ room, roomType, date, timeslot, seat: seat || null, username, userTier });
         await newReservation.save();
 
         res.status(201).json({ message: "Reservation successful!" });
+
     } catch (error) {
         console.error("Reservation Error:", error);
         res.status(500).json({ error: "Server error, please try again later" });
     }
 });
+
+
+
+app.get("/user-reservations", async (req, res) => {
+    try {
+        const { username, date } = req.query;
+
+        if (!username || !date) {
+            return res.status(400).json({ error: "Username and date are required." });
+        }
+
+        function convertToDate(timeStr) {
+            let [time, modifier] = timeStr.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+        
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+        
+            return new Date(2000, 0, 1, hours, minutes);
+        }
+        
+
+        function getMinutesDifference(startTime, endTime) {
+            const start = convertToDate(startTime);
+            const end = convertToDate(endTime);
+            return (end - start) / (1000 * 60); // Convert milliseconds to minutes
+        }
+
+        const reservations = await Reservation.find({ username, date });
+
+        let totalMinutes = 0;
+        reservations.forEach(reservation => {
+            const [startTime, endTime] = reservation.timeslot.split(" - ");
+            totalMinutes += getMinutesDifference(startTime, endTime);
+        });
+
+        res.status(200).json({ totalMinutes });
+    } catch (error) {
+        console.error("Error fetching user reservations:", error);
+        res.status(500).json({ error: "Server error, please try again later." });
+    }
+});
+
 
 // Start Server
 const PORT = process.env.PORT || 3000;
