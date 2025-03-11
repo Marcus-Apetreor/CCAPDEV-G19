@@ -11,6 +11,16 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Configure CORS to allow requests from frontend-backend
+app.use(cors({
+    origin: 'http://localhost:5500', // Replace with frontend port
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+
+app.use(bodyParser.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files from the uploads directory
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -18,6 +28,39 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.error("MongoDB Connection Error:", err));
+
+// Configure multer for file uploads
+// documentation: https://www.npmjs.com/package/multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+const upload = multer({ storage });
+
+// Update Profile Route
+app.post('/update-profile', upload.single('profilePicture'), async (req, res) => {
+    try {
+        const { bio } = req.body;
+        const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
+        const userId = req.user._id; // display user id
+
+        const updatedData = { bio };
+        if (profilePicture) {
+            updatedData.profilePicture = profilePicture;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ error: "Server error, please try again later" });
+    }
+});
 
 // **Register Route**
 app.post('/register', async (req, res) => {
@@ -53,7 +96,8 @@ app.post('/register', async (req, res) => {
             email,
             password: hashedPassword,
             tier,
-            bio: null  // Explicitly setting bio as NULL
+            bio: null,
+            approved: tier === 1 // Automatically approve tier 1 accounts
         });
 
         await newUser.save();
@@ -65,7 +109,6 @@ app.post('/register', async (req, res) => {
         res.status(500).json({ error: "Server error, please try again later" });
     }
 });
-
 
 app.post('/login', async (req, res) => {
     try {
@@ -268,9 +311,6 @@ app.get("/check-student", async (req, res) => {
     }
 });
 
-
-
-
 app.get("/user-reservations", async (req, res) => {
     try {
         const { username, date } = req.query;
@@ -311,6 +351,40 @@ app.get("/user-reservations", async (req, res) => {
     }
 });
 
+// Fetch pending accounts
+app.get('/pending-accounts', async (req, res) => {
+    try {
+        const pendingAccounts = await User.find({ approved: false, tier: { $gt: 1 } });
+        res.status(200).json(pendingAccounts);
+    } catch (error) {
+        console.error('Error fetching pending accounts:', error);
+        res.status(500).json({ error: 'Server error, please try again later.' });
+    }
+});
+
+// Approve account
+app.post('/approve-account/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await User.findByIdAndUpdate(id, { approved: true });
+        res.status(200).json({ message: 'Account approved successfully' });
+    } catch (error) {
+        console.error('Error approving account:', error);
+        res.status(500).json({ error: 'Server error, please try again later.' });
+    }
+});
+
+// Disapprove account
+app.post('/disapprove-account/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await User.findByIdAndDelete(id);
+        res.status(200).json({ message: 'Account disapproved and deleted successfully' });
+    } catch (error) {
+        console.error('Error disapproving account:', error);
+        res.status(500).json({ error: 'Server error, please try again later.' });
+    }
+});
 
 // Start Server
 const PORT = process.env.PORT || 3000;
