@@ -136,7 +136,12 @@ select:focus, input[type="date"]:focus {
     justify-content: center;
     margin-top: auto;
     margin-bottom: auto;
+    text-align: left; /* Ensures left alignment */
     
+}
+
+.container h1 {
+    margin-bottom: 10px; /* Reduced space below title */
 }
 
 .seat-container {
@@ -185,8 +190,10 @@ select:focus, input[type="date"]:focus {
         label {
             display: block;
             font-size: 16px;
-            margin: 15px 0 5px;
             width: 100%;
+    margin-top: 8px; /* Reduce space between inputs */
+    margin-bottom: 3px; /* Reduce space before next element */
+
         }
 
         select, button {
@@ -276,14 +283,86 @@ select:focus, input[type="date"]:focus {
             background-color: #16AE5C;
             color: white;
         }
-        
+
+        #reserveForStudentContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Adjust spacing between checkbox and text */
+    margin-top: 5px; /* Reduce extra space */
+}
+
+        /* Student Username Popup */
+.popup {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed positioning to overlay the page */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Ensure true centering */
+    background: white;
+    padding: 20px;
+    width: 300px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 1000; /* Ensure it's above everything */
+}
+
+/* Dark background overlay */
+.popup-overlay {
+    display: none; /* Initially hidden */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 999; /* Just below the popup */
+}
+
+/* Close button */
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#reserveForStudentContainer {
+    display: flex;
+    align-items: center; /* Ensure proper vertical alignment */
+    gap: 5px; /* Space between checkbox and label */
+    margin-top: 5px; /* Reduce extra space */
+    justify-content: left; /* Align content to the left */
+    width: auto; /* Ensure no unnecessary wrapping */
+    flex-wrap: nowrap; /* Prevents wrapping */
+    align-self: flex-start;
+    margin-bottom: 10px;
+}
+
+#reserveForStudentCheckbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin: 0;
+    display: inline-block;
+}
+
+#reserveForStudentContainer label {
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    white-space: nowrap; /* Prevents wrapping */
+    display: inline-block;
+    vertical-align: middle; /* Ensures it aligns with the checkbox */
+}
+ 
     </style>
 </head>
 <body>
-  
 
     <div class="bg-left"></div>
-    
 
     <div class="main-container">
         <div class="container">
@@ -293,12 +372,19 @@ select:focus, input[type="date"]:focus {
 
             <label for="date-selection">Select Date:</label>
             <input type="date" id="date-selection" min="">
-            
+
             <label for="start-time">Select Start Time:</label>
             <select id="start-time"></select>
 
             <label for="end-time">Select End Time:</label>
             <select id="end-time"></select>
+
+            <!-- Reserve for Student Checkbox (Hidden by Default) -->
+            <div id="reserveForStudentContainer" style="display: none; align-items: center; gap: 5px; margin-bottom: 10px;">
+                <input type="checkbox" id="reserveForStudentCheckbox">
+                <label for="reserveForStudentCheckbox">Reserve for a student</label>
+            </div>
+            
 
             <button id="reserve-btn">Reserve</button>
 
@@ -310,12 +396,25 @@ select:focus, input[type="date"]:focus {
             <div class="front-class">Front of the class</div>
             <div class="seat-grid" id="seat-grid"></div>
         </div>
+
         <div class="slideshow">
             <div class="slides">
                 <img src="img/lab1.png" class="active" alt="Lab 1">
                 <img src="img/lab2.png" alt="Lab 2">
                 <img src="img/lab3.jpg" alt="Lab 3">
             </div>
+        </div>
+    </div>
+
+    <div id="popupOverlay" class="popup-overlay"></div>
+
+    <!-- Student Username Popup -->
+    <div id="studentReservationPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <span class="close-popup">&times;</span>
+            <h3>Enter Student's Username</h3>
+            <input type="text" id="studentUsernameInput" placeholder="Enter username">
+            <button id="confirmStudentReservation">Confirm</button>
         </div>
     </div>
 
