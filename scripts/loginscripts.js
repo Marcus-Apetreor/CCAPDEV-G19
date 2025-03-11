@@ -18,66 +18,49 @@ document.addEventListener("DOMContentLoaded", function() {
     const signupForm = document.querySelector("#signup-form form");
 
     signupForm.addEventListener("submit", async (event) => {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault();
 
-        // Get input values
-        const username = document.getElementById("username-input").value.trim();
-        const email = document.getElementById("email-input").value.trim();
-        const password = document.getElementById("password-input").value;
-        const repeatPassword = document.getElementById("repeat-password-input").value;
-        const accountType = document.getElementById("account-select").value;
+        const formData = new FormData(signupForm);
+        const data = {
+            username: formData.get("username"),
+            email: formData.get("email"),
+            password: formData.get("password"),
+            repeatPassword: formData.get("repeat-password"),
+            accountType: formData.get("account")
+        };
 
-        // Send request to backend
         try {
             const response = await fetch("http://localhost:3000/register", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password, repeatPassword, accountType })
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
             });
 
-            const result = await response.json();
+            const responseText = await response.text();
+            console.log("Raw response:", responseText);
 
             if (response.ok) {
-                alert("Signup successful! You can now log in.");
-                signupForm.reset();
+                if (responseText) {
+                    const result = JSON.parse(responseText);
+                    alert(result.message);
+                    window.location.href = "loginpage.html";
+                } else {
+                    alert("Registration successful, but no message received.");
+                    window.location.href = "loginpage.html";
+                }
             } else {
-                alert(`Error: ${result.error}`);
+                if (responseText) {
+                    const error = JSON.parse(responseText);
+                    alert(error.error);
+                } else {
+                    alert("An error occurred while registering. Please try again.");
+                }
             }
         } catch (error) {
             console.error("Error registering:", error);
-            alert("Something went wrong. Please try again.");
-        }
-    });
-
-    const loginForm = document.querySelector("#login-form form");
-
-    loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault(); // Prevent default form submission
-
-        // Get input values
-        const username = loginForm.querySelector("input[name='username']").value.trim();
-        const password = loginForm.querySelector("input[name='password']").value;
-
-        // Send request to backend
-        try {
-            const response = await fetch("http://localhost:3000/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                alert("Login successful!");
-                localStorage.setItem("user", JSON.stringify(result.user)); // Store user data in local storage
-                window.location.href = "mainhub.html"; // Redirect to a dashboard page
-            } else {
-                alert(`Error: ${result.error}`);
-            }
-        } catch (error) {
-            console.error("Error logging in:", error);
-            alert("Something went wrong. Please try again.");
+            alert("An error occurred while registering. Please try again.");
         }
     });
 });
