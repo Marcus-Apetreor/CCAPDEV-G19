@@ -1,4 +1,4 @@
-async function submitReservation() {
+async function submitReservation(confirmOverwrite = false) {
     const room = document.getElementById("room-selection").value;
     const date = document.getElementById("date-selection").value;
     const timeslot = document.getElementById("timeslot-selection").value;
@@ -8,9 +8,12 @@ async function submitReservation() {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
         alert("You must be logged in to make a reservation.");
-        window.location.href = "login.html"; // Redirect to login
+        window.location.href = "login.html"; 
         return;
     }
+
+    const userTier = user.tier;
+    const roomType = "conference";
 
     // Check if all required fields are filled
     if (!room || !date || !timeslot) {
@@ -18,26 +21,44 @@ async function submitReservation() {
         return;
     }
 
-    const roomType = "conference";
-
-    // Debugging logs
-    console.log("Submitting Reservation:", { room, roomType, date, timeslot, seat, username: user.username });
-
     try {
-        const response = await fetch("http://localhost:3000/reserve", {
+        // **Step 1: Check for existing reservations**
+        const checkResponse = await fetch("http://localhost:3000/check-reservation", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ room, roomType, date, timeslot, seat, username: user.username })
+            body: JSON.stringify({ room, roomType, date, timeslot, seat, userTier })
         });
 
-        const result = await response.json();
-        
+        const checkResult = await checkResponse.json();
 
-        if (response.ok) {
+        if (checkResponse.ok) {
+            if (checkResult.requireConfirmation) {
+                // **Step 2: Ask user for confirmation before overwriting**
+                const userConfirmed = confirm(checkResult.message);
+                if (!userConfirmed) {
+                    return; // Stop if user declines to overwrite
+                }
+            }
+        } else {
+            alert(`Error: ${checkResult.error}`);
+            return;
+        }
+
+        // **Step 3: Proceed with reservation (with overwrite if needed)**
+        const reserveResponse = await fetch("http://localhost:3000/reserve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ room, roomType, date, timeslot, seat, username: user.username, userTier, confirmOverwrite: true })
+        });
+
+        const reserveResult = await reserveResponse.json();
+
+        if (reserveResponse.ok) {
             alert("Reservation successful!");
         } else {
-            alert(`Error: ${result.error}`);
+            alert(`Error: ${reserveResult.error}`);
         }
+
     } catch (error) {
         console.error("Reservation error:", error);
         alert("Something went wrong. Please try again.");

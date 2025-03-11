@@ -48,7 +48,14 @@ app.post('/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = new User({ username, email, password: hashedPassword, tier });
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+            tier,
+            bio: null  // Explicitly setting bio as NULL
+        });
+
         await newUser.save();
 
         res.status(201).json({ message: "User registered successfully" });
@@ -58,6 +65,7 @@ app.post('/register', async (req, res) => {
         res.status(500).json({ error: "Server error, please try again later" });
     }
 });
+
 
 app.post('/login', async (req, res) => {
     try {
@@ -138,11 +146,11 @@ app.post("/check-reservation", async (req, res) => {
 
                 if (canOverwrite) {
                     return res.status(200).json({
-                        message: `This seat is already reserved by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                        message: `There is already a reservation by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
                         requireConfirmation: true
                     });
                 } else {
-                    return res.status(400).json({ error: "Seat is already reserved within this timeslot." });
+                    return res.status(400).json({ error: "There is already a reservation within this timeslot." });
                 }
             }
         }
@@ -199,11 +207,11 @@ app.post("/reserve", async (req, res) => {
     
                     if (canOverwrite) {
                         return res.status(200).json({
-                            message: `A seat is already reserved by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                            message: `There is already a reservation by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
                             requireConfirmation: true
                         });
                     } else {
-                        return res.status(400).json({ error: "Seat is already reserved within this timeslot." });
+                        return res.status(400).json({ error: "There is already a reservation within this timeslot." });
                     }
                 }
             }
