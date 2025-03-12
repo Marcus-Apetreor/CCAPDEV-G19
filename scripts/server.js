@@ -327,6 +327,48 @@ app.post("/reserve", async (req, res) => {
     }
 });
 
+app.delete('/cancel-reservation', async (req, res) => {
+    console.log("Received DELETE request:", req.body);
+
+    try {
+        let { room, seat, date, timeslot, username } = req.body;
+
+        if (!room || !date || !timeslot || !username) {
+            console.log("Missing required fields!");
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        // 🔹 Convert seat "null" (string) to actual null value
+        if (seat === "null" || seat === "N/A") {
+            seat = null;
+        }
+
+        console.log(`Searching for reservation: Room=${room}, Seat=${seat}, Date=${date}, Time=${timeslot}, User=${username}`);
+
+        const deletedReservation = await Reservation.findOneAndDelete({
+            room,
+            seat,
+            date,
+            timeslot,
+            username
+        });
+
+        if (!deletedReservation) {
+            console.log("Reservation not found!");
+            return res.status(404).json({ error: "Reservation not found" });
+        }
+
+        console.log("Reservation canceled successfully.");
+        res.status(200).json({ message: "Reservation canceled successfully" });
+
+    } catch (error) {
+        console.error("Error canceling reservation:", error);
+        res.status(500).json({ error: "Server error, please try again later." });
+    }
+});
+
+
+
 app.get("/check-student", async (req, res) => {
     try {
         const { username } = req.query;
@@ -398,6 +440,58 @@ app.get("/user-reservations", async (req, res) => {
         res.status(500).json({ error: "Server error, please try again later." });
     }
 });
+
+app.get("/reservations", async (req, res) => {
+    try {
+        const reservations = await Reservation.find();
+        res.json(reservations);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch reservations" });
+    }
+});
+
+// Update reservation when seat is "N/A" or null
+app.put("/update-reservation", async (req, res) => {
+    try {
+        const { 
+            originalUsername, 
+            originalRoom, 
+            originalDate, 
+            originalTimeblock, 
+            username, 
+            room, 
+            date, 
+            timeslot, 
+            seat 
+        } = req.body;
+
+        if (!originalUsername || !originalRoom || !originalDate || !originalTimeblock) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const updatedReservation = await Reservation.findOneAndUpdate(
+            { 
+                username: originalUsername, 
+                room: originalRoom, 
+                date: originalDate, 
+                timeslot: originalTimeblock 
+            }, // Find using original values
+            { username, room, seat, date, timeslot }, // Update fields
+            { new: true } // Return updated document
+        );
+
+        if (!updatedReservation) {
+            return res.status(404).json({ error: "Reservation not found" });
+        }
+
+        res.status(200).json({ message: "Reservation updated successfully", updatedReservation });
+    } catch (error) {
+        console.error("Error updating reservation:", error);
+        res.status(500).json({ error: "Server error. Please try again." });
+    }
+});
+
+
 
 app.get("/my-reservations", async (req, res) => {
     try {

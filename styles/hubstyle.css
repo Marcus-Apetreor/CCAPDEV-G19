@@ -306,6 +306,21 @@ main table tbody tr:hover {
     transition: background-color 0.3s;
 }
 
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #bb2d3b;
+}
+
+
 /* Responsive Table - Ensure it adapts on smaller screens */
 @media (max-width: 800px) {
     main table {

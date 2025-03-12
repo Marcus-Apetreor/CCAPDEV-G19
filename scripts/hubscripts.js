@@ -156,7 +156,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
     
-
     document.getElementById('myReservationsBtn').addEventListener('click', async () => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (!user || !user.username) {
@@ -174,34 +173,82 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${reservation.seat || "N/A"}</td>
                     <td>${reservation.date}</td>
                     <td>${reservation.timeslot}</td>
+                    <td>
+                        <button class="cancel-btn" data-room="${reservation.room}" data-seat="${reservation.seat}" 
+                            data-date="${reservation.date}" data-timeslot="${reservation.timeslot}" data-username="${user.username}">
+                            Cancel
+                        </button>
+                    </td>
                 </tr>
             `).join('');
     
             mainContent.innerHTML = `
-            <h2>My Reservations</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Room</th>
-                            <th>Seat</th>
-                            <th>Date</th>
-                            <th>Time Slot</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
+                <h2>My Reservations</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Seat</th>
+                                <th>Date</th>
+                                <th>Time Slot</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservationTable">
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+    
+            // Attach event listener to the table container
+            document.getElementById('reservationTable').addEventListener('click', async function (event) {
+                if (event.target.classList.contains('cancel-btn')) {
+                    const room = event.target.dataset.room;
+                    const seat = event.target.dataset.seat;
+                    const date = event.target.dataset.date;
+                    const timeslot = event.target.dataset.timeslot;
+                    const username = event.target.dataset.username;
+    
+                    cancelReservation(room, seat, date, timeslot, username);
+                }
+            });
+    
         } catch (error) {
             console.error("Error fetching reservations:", error);
             alert("An error occurred while fetching reservations. Please try again.");
         }
     });
+    
+    // Function to cancel a reservation
+    async function cancelReservation(room, seat, date, timeslot, username) {
+        const confirmation = confirm("Are you sure you want to cancel this reservation?");
+        if (!confirmation) return;
+    
+        try {
+            const response = await fetch("http://localhost:3000/cancel-reservation", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ room, seat, date, timeslot, username }) // 🔹 Ensure JSON is sent
+            });
+    
+            if (response.ok) {
+                alert("Reservation canceled successfully.");
+                document.getElementById('myReservationsBtn').click();
+            } else {
+                alert("Failed to cancel reservation. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error canceling reservation:", error);
+            alert("An error occurred while canceling the reservation.");
+        }
+    }
+    
+    
 
+    
+    
     // Reserve a Room Button
     if (reserveRoomBtn) {
         reserveRoomBtn.addEventListener('click', () => {
