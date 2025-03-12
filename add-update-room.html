@@ -74,6 +74,8 @@
             border-radius: 10px;
             background-color: var(--background-color);
         }
+
+        
     </style>
 </head>
 <body>
@@ -173,42 +175,74 @@
 
     
 
-    <!-- Add Reservation Modal -->
-    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addModalLabel">Add Reservation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addForm">
-                        <div class="mb-3">
-                            <label for="addUsername" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="addUsername" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addRoom" class="form-label">Room</label>
-                            <input type="text" class="form-control" id="addRoom" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addSeat" class="form-label">Seat</label>
-                            <input type="text" class="form-control" id="addSeat" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addDate" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="addDate" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="addTimeBlock" class="form-label">Time Block</label>
-                            <select class="form-control" id="addTimeBlock" required></select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Add Reservation</button>
-                    </form>
-                </div>
+<!-- Add Reservation Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Add Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addForm">
+                    <!-- Room Type Selection -->
+                    <div class="mb-3">
+                        <label for="addRoomType" class="form-label">Room Type</label>
+                        <select class="form-control" id="addRoomType" required>
+                            <option value="complab">Computer Lab</option>
+                            <option value="lecture">Lecture Room</option>
+                            <option value="conference">Conference Room</option>
+                        </select>
+                    </div>
+
+                    <!-- Username Input -->
+                    <div class="mb-3">
+                        <label for="addUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="addUsername" required>
+                    </div>
+
+                    <!-- Room Input -->
+                    <div class="mb-3">
+                        <label for="addRoom" class="form-label">Room</label>
+                        <input type="text" class="form-control" id="addRoom" required>
+                    </div>
+                    
+                    <!-- Seat Input -->
+                    <div class="mb-3">
+                        <label for="addSeat" class="form-label">Seat</label>
+                        <input type="text" class="form-control" id="addSeat" required>
+                    </div>
+
+                    <!-- Date Input -->
+                    <div class="mb-3">
+                        <label for="addDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="addDate" required>
+                    </div>
+
+                    <!-- Time Block Dropdown (For Lecture & Conference Rooms) -->
+                    <div class="mb-3" id="addTimeBlockContainer" style="display: none;">
+                        <label for="addTimeBlock" class="form-label">Time Block</label>
+                        <select class="form-control" id="addTimeBlock" required></select>
+                    </div>
+
+                    <!-- Start & End Time (For Computer Labs) -->
+                    <div id="addStartTimeContainer" class="mb-3">
+                        <label for="start-time" class="form-label">Start Time</label>
+                        <select class="form-control" id="add-start-time"></select>
+                    </div>
+                    <div id="addEndTimeContainer" class="mb-3">
+                        <label for="end-time" class="form-label">End Time</label>
+                        <select class="form-control" id="add-end-time"></select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Add Reservation</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
+
 
     <script>
         let reservations = [
@@ -219,16 +253,17 @@
             { username: "BruceWayne", room: "A303", seat: "3B", date: "2025-02-14", timeBlock: "14:30 - 15:45" }
         ];
 
-        const timeBlocks = [
-            "07:30 - 09:00",
-            "09:15 - 10:45",
-            "11:00 - 12:30",
-            "12:45 - 14:15",
-            "14:30 - 15:45",
-            "16:00 - 17:30",
-            "17:45 - 19:15",
-            "19:30 - 21:00"
-        ];
+            const timeBlocks = [
+        "7:30 AM - 9:00 AM",
+        "9:15 AM - 10:45 AM",
+        "11:00 AM - 12:30 PM",
+        "12:45 PM - 2:15 PM",
+        "2:30 PM - 4:00 PM",
+        "4:15 PM - 5:45 PM",
+        "6:00 PM - 7:30 PM",
+        "7:45 PM - 9:15 PM"
+    ];
+
 
         function populateTimeBlocks(selectElement) {
             selectElement.innerHTML = "";
@@ -261,25 +296,7 @@
             });
         }
 
-        function addReservation(event) {
-            event.preventDefault();
-            const newReservation = {
-                username: document.getElementById("addUsername").value,
-                room: document.getElementById("addRoom").value,
-                seat: document.getElementById("addSeat").value || "N/A",
-                date: document.getElementById("addDate").value,
-                timeBlock: document.getElementById("addTimeBlock").value
-            };
-            reservations.push(newReservation);
-            renderReservations();
-            bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
-        }
-
-        document.getElementById("addForm").addEventListener("submit", addReservation);
-        document.addEventListener("DOMContentLoaded", function () {
-            populateTimeBlocks(document.getElementById("addTimeBlock"));
-            renderReservations();
-        });
+       
     </script>
     <script src="scripts/updateroom.js"></script>
 </body>

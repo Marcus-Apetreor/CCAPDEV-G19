@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", async function () {
+
     const filterDropdown = document.getElementById("filterRoomType");
     const searchInput = document.getElementById("searchRoom");
     const searchButton = document.getElementById("searchButton");
@@ -276,4 +276,174 @@ function generateTimeOptions(selectElement, startHour, startMinute) {
 
     // Fetch initial data
     fetchReservations();
+
+
+// Ensure this function is placed at the TOP of your script
+function generateTimeOptions(selectElement, startHour, startMinute) {
+    selectElement.innerHTML = ""; // Clear existing options
+
+    const endHour = 21, endMinute = 30;
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+
+    while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
+        let ampm = currentHour < 12 ? "AM" : "PM";
+        let displayHour = currentHour % 12 || 12;
+        let displayMinute = currentMinute.toString().padStart(2, '0');
+        let timeValue = `${displayHour}:${displayMinute} ${ampm}`;
+
+        let option = document.createElement("option");
+        option.value = timeValue;
+        option.textContent = timeValue;
+
+        selectElement.appendChild(option);
+
+        currentMinute += 30;
+        if (currentMinute === 60) {
+            currentMinute = 0;
+            currentHour++;
+        }
+    }
+}
+
+
+document.getElementById("addRoomType").addEventListener("change", function () {
+    const selectedType = this.value;
+    const seatInput = document.getElementById("addSeat");
+    const timeBlockContainer = document.getElementById("addTimeBlockContainer");
+    const startTimeContainer = document.getElementById("addStartTimeContainer");
+    const endTimeContainer = document.getElementById("addEndTimeContainer");
+    const startTimeSelect = document.getElementById("add-start-time");
+    const endTimeSelect = document.getElementById("add-end-time");
+    const timeBlockSelect = document.getElementById("addTimeBlock");
+
+    if (selectedType === "complab") {
+        // Enable Seat input for Computer Lab
+        seatInput.disabled = false;
+        seatInput.style.backgroundColor = "";
+        seatInput.style.cursor = "";
+
+        // Hide Time Block, Show Start & End Time
+        timeBlockContainer.style.display = "none";
+        startTimeContainer.style.display = "block";
+        endTimeContainer.style.display = "block";
+
+        // Populate Start & End Time dropdowns
+        generateTimeOptions(startTimeSelect, 7, 30);
+        generateTimeOptions(endTimeSelect, 8, 0);
+    } else {
+        // Disable Seat input for Lecture & Conference Room
+        seatInput.disabled = true;
+        seatInput.style.backgroundColor = "#e9ecef";
+        seatInput.style.cursor = "not-allowed";
+
+        // Show Time Block, Hide Start & End Time
+        timeBlockContainer.style.display = "block"; // Ensure it's set to visible
+        startTimeContainer.style.display = "none";
+        endTimeContainer.style.display = "none";
+
+        // Populate Time Block dropdown
+        populateTimeBlocks(timeBlockSelect);
+    }
+});
+
+
+
+function addReservation(event) {
+    event.preventDefault();
+
+    const selectedRoomType = document.getElementById("addRoomType").value;
+    let timeBlockValue = document.getElementById("addTimeBlock").value;
+
+    // If Computer Lab is selected, convert Start & End Time into Time Block format
+    if (selectedRoomType === "complab") {
+        const startTime = document.getElementById("add-start-time").value;
+        const endTime = document.getElementById("add-end-time").value;
+        timeBlockValue = `${startTime} - ${endTime}`;
+    }
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userTier = user.tier;
+
+    const newReservation = {
+        room: document.getElementById("addRoom").value,
+        roomType: selectedRoomType,
+        date: document.getElementById("addDate").value,
+        timeslot: timeBlockValue,
+        seat: selectedRoomType === "complab" ? (document.getElementById("addSeat").value || null) : null,
+        username: document.getElementById("addUsername").value,
+        userTier: userTier
+    };
+
+    // **Step 1: Check for existing reservations**
+    fetch("http://localhost:3000/check-reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            room: newReservation.room,
+            roomType: newReservation.roomType,
+            date: newReservation.date,
+            timeslot: newReservation.timeslot,
+            seat: newReservation.seat,
+            userTier: newReservation.userTier
+        })
+    })
+    .then(response => response.json())
+    .then(checkResult => {
+        if (checkResult.requireConfirmation) {
+            // **Step 2: Ask user for confirmation before overwriting**
+            const userConfirmed = confirm(checkResult.message);
+            if (!userConfirmed) {
+                alert("Reservation not made.");
+                return; // Stop if user declines to overwrite
+            }
+
+            // **Step 3: Proceed with reservation (with overwrite if needed)**
+            newReservation.confirmOverwrite = true;
+
+            return fetch("http://localhost:3000/reserve", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newReservation)
+            });
+        } else {
+            // No confirmation needed, directly proceed with reservation
+            return fetch("http://localhost:3000/reserve", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newReservation)
+            });
+        }
+    })
+    .then(reserveResponse => reserveResponse.json())
+    .then(reserveResult => {
+        if (reserveResult.message === "Reservation successful!") {
+            alert("Reservation successful!");
+            fetchReservations(); // Refresh the table after reservation is added
+            bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+        } else {
+            alert(`Error: ${reserveResult.error}`);
+        }
+    })
+    .catch(error => {
+        console.error("Error adding reservation:", error);
+        alert("An error occurred while adding the reservation.");
+    });
+}
+
+
+
+document.getElementById("addForm").addEventListener("submit", addReservation);
+document.addEventListener("DOMContentLoaded", function () {
+    populateTimeBlocks(document.getElementById("addTimeBlock"));
+    const selectedRoomType = document.getElementById("addRoomType").value;
+    const startTimeSelect = document.getElementById("add-start-time");
+    const endTimeSelect = document.getElementById("add-end-time");
+
+    if (selectedRoomType === "complab") {
+        // If "Computer Lab" is selected, populate Start and End Time
+        generateTimeOptions(startTimeSelect, 7, 30);
+        generateTimeOptions(endTimeSelect, 8, 0);
+    }
+    renderReservations();
 });

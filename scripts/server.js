@@ -241,8 +241,23 @@ app.post("/reserve", async (req, res) => {
     try {
         const { room, roomType, date, timeslot, seat, username, userTier, confirmOverwrite } = req.body;
 
-        if (!room || !roomType || !date || !timeslot || !username || userTier === undefined) {
-            return res.status(400).json({ error: "All required fields must be filled" });
+        if (!room) {
+            return res.status(400).json({ error: "Room is required" });
+        }
+        if (!roomType) {
+            return res.status(400).json({ error: "Room Type is required" });
+        }
+        if (!date) {
+            return res.status(400).json({ error: "Date is required" });
+        }
+        if (!timeslot) {
+            return res.status(400).json({ error: "Timeslot is required" });
+        }
+        if (!username) {
+            return res.status(400).json({ error: "Username is required" });
+        }
+        if (userTier === undefined) {
+            return res.status(400).json({ error: "User Tier is required" });
         }
 
         function parseTime(timeString) {
