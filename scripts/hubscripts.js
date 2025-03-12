@@ -279,78 +279,123 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Approve Account Button
-    if (approveAccBtn) {
-        approveAccBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch('http://localhost:3000/pending-accounts');
-                const accounts = await response.json();
+// Approve Account Button
+if (approveAccBtn) {
+    approveAccBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('http://localhost:3000/pending-accounts');
+            const accounts = await response.json();
 
-                let accountRows = accounts.map((account, index) => `
-                    <tr id="account-${index}">
-                        <td>${account.username}</td>
-                        <td>${account.email}</td>
-                        <td>${account.tier}</td>
-                        <td>
-                            <button onclick="approveAccount('${account._id}', ${index})">Approve</button>
-                            <button onclick="disapproveAccount('${account._id}', ${index})">Disapprove</button>
-                        </td>
-                    </tr>
-                `).join('');
+            let accountRows = accounts.map((account, index) => `
+                <tr id="account-${index}">
+                    <td>${account.username}</td>
+                    <td>${account.email}</td>
+                    <td>${account.tier}</td>
+                    <td>
+                        <button class="approve-btn" data-username="${account.username}" data-tier="${account.tier}" data-index="${index}">Approve</button>
+                        <button class="disapprove-btn" data-username="${account.username}" data-tier="${account.tier}" data-index="${index}">Disapprove</button>
+                    </td>
+                </tr>
+            `).join('');
 
-                mainContent.innerHTML = `
-                  <h2>Approve Accounts</h2>
-                  <table>
+            // Inject the table into the main content
+            mainContent.innerHTML = `
+                <h2>Approve Accounts</h2>
+                <table>
                     <thead>
-                      <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Account Tier Requested</th>
-                        <th>Actions</th>
-                      </tr>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Account Tier Requested</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                      ${accountRows}
+                        ${accountRows}
                     </tbody>
-                  </table>
-                `;
-            } catch (error) {
-                console.error('Error fetching pending accounts:', error);
-            }
+                </table>
+            `;
+
+            // Attach event listeners to approve and disapprove buttons after the table is rendered
+            document.querySelectorAll(".approve-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const username = this.getAttribute('data-username');
+                    const tier = this.getAttribute('data-tier');
+                    const index = this.getAttribute('data-index');
+
+                    // Confirm before proceeding with approval
+                    const confirmApproval = confirm(`Are you sure you want to approve the account of ${username} (Tier ${tier})?`);
+                    if (confirmApproval) {
+                        approveAccount(username, index); // Call approve function
+                    }
+                });
+            });
+    
+            document.querySelectorAll(".disapprove-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const username = this.getAttribute('data-username');
+                    const tier = this.getAttribute('data-tier');
+                    const index = this.getAttribute('data-index');
+
+                    // Confirm before proceeding with disapproval
+                    const confirmDisapproval = confirm(`Are you sure you want to disapprove the account of ${username} (Tier ${tier})?`);
+                    if (confirmDisapproval) {
+                        disapproveAccount(username, index); // Call disapprove function
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error('Error fetching pending accounts:', error);
+        }
+    });
+}
+
+// Function to approve account (using username)
+async function approveAccount(username, index) {
+    try {
+        const response = await fetch(`http://localhost:3000/approve-account/${username}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
         });
-    }
 
-    async function approveAccount(accountId, index) {
-        try {
-            const response = await fetch(`http://localhost:3000/approve-account/${accountId}`, {
-                method: 'POST'
-            });
-            if (response.ok) {
-                document.getElementById(`account-${index}`).remove();
-                alert('Account approved');
-            } else {
-                alert('Failed to approve account');
-            }
-        } catch (error) {
-            console.error('Error approving account:', error);
-        }
-    }
+        const result = await response.json();
 
-    async function disapproveAccount(accountId, index) {
-        try {
-            const response = await fetch(`http://localhost:3000/disapprove-account/${accountId}`, {
-                method: 'POST'
-            });
-            if (response.ok) {
-                document.getElementById(`account-${index}`).remove();
-                alert('Account disapproved');
-            } else {
-                alert('Failed to disapprove account');
-            }
-        } catch (error) {
-            console.error('Error disapproving account:', error);
+        if (response.ok) {
+            alert('Account approved successfully!');
+            document.getElementById(`account-${index}`).remove(); // Remove the row from the table
+        } else {
+            alert(result.error || 'Failed to approve account.');
         }
+    } catch (error) {
+        console.error('Error approving account:', error);
+        alert('An error occurred while approving the account.');
     }
+}
+
+// Function to disapprove account (using username)
+async function disapproveAccount(username, index) {
+    try {
+        const response = await fetch(`http://localhost:3000/disapprove-account/${username}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Account disapproved successfully!');
+            document.getElementById(`account-${index}`).remove(); // Remove the row from the table
+        } else {
+            alert(result.error || 'Failed to disapprove account.');
+        }
+    } catch (error) {
+        console.error('Error disapproving account:', error);
+        alert('An error occurred while disapproving the account.');
+    }
+}
+
+
 });
 
 function toggleSidebar() {

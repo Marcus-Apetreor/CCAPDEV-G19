@@ -320,6 +320,39 @@ main table tbody tr:hover {
     background-color: #bb2d3b;
 }
 
+/* Approve Button */
+.approve-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.approve-btn:hover {
+    background-color: #218838;
+    color: white;
+}
+
+/* Disapprove Button */
+.disapprove-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.disapprove-btn:hover {
+    background-color: #bb2d3b;
+    color: white;
+}
+
+
 
 /* Responsive Table - Ensure it adapts on smaller screens */
 @media (max-width: 800px) {

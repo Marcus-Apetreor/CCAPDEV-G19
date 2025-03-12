@@ -9,6 +9,7 @@ const path = require('path');
 const User = require('./models/User'); // Import User model
 const Reservation = require("./models/Reservation"); 
 const fs = require('fs');
+const Application = require("./models/Application"); 
 
 
 
@@ -63,6 +64,7 @@ app.post('/register', async (req, res) => {
     try {
         const { username, email, password, repeatPassword, accountType } = req.body;
 
+        // Validate input
         if (!username || !email || !password || !repeatPassword || !accountType) {
             return res.status(400).json({ error: "All fields are required" });
         }
@@ -71,11 +73,13 @@ app.post('/register', async (req, res) => {
             return res.status(400).json({ error: "Passwords do not match" });
         }
 
+        // Check if username or email already exists
         const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
             return res.status(400).json({ error: "Username or email already exists" });
         }
 
+        // Mapping account types to tiers
         const tierMapping = { 
             student: 1, 
             officer: 2, 
@@ -84,28 +88,49 @@ app.post('/register', async (req, res) => {
         };
         const tier = tierMapping[accountType.toLowerCase()] || 1;
 
+        // Hash the password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = new User({
-            username,
-            email,
-            password: hashedPassword,
-            tier,
-            bio: null,
-            profilePicture: "/img/defaultdp.png", // Assign default profile picture
-            approved: tier === 1
-        });
+        if (tier === 2 || tier === 3) {
+            // Store tier 2 or 3 users in the Application database
+            const newApplication = new Application({
+                username,
+                email,
+                password: hashedPassword,
+                tier,
+                bio: null,
+                profilePicture: "/img/defaultdp.png", // Default profile picture
+            });
 
-        await newUser.save();
+            await newApplication.save();
 
-        res.status(201).json({ message: "User registered successfully" });
+            // Send back confirmation response with alert message for tier 2 or 3 users
+            res.status(201).json({ 
+                message: "Application sent! Kindly wait for approval from the administrator." 
+            });
+        } else {
+            // For tier 1 (student) and tier 4 (admin), create the user directly in the User database
+            const newUser = new User({
+                username,
+                email,
+                password: hashedPassword,
+                tier,
+                bio: null,
+                profilePicture: "/img/defaultdp.png", // Default profile picture
+                approved: true // Auto approve for tier 1 and 4
+            });
+
+            await newUser.save();
+            res.status(201).json({ message: "User registered successfully" });
+        }
 
     } catch (error) {
         console.error("Error registering user:", error);
         res.status(500).json({ error: "Server error, please try again later" });
     }
 });
+
 
 
 app.post('/update-profile', upload.single('profilePicture'), async (req, res) => {
@@ -524,40 +549,73 @@ app.get("/my-reservations", async (req, res) => {
 });
 
 
-// Fetch pending accounts
+// Server-side endpoint to retrieve all accounts in the Application database
 app.get('/pending-accounts', async (req, res) => {
     try {
-        const pendingAccounts = await User.find({ approved: false, tier: { $gt: 1 } });
-        res.status(200).json(pendingAccounts);
+        // Fetch all accounts from the Application collection
+        const applications = await Application.find();
+
+        // Return the accounts to the client
+        res.status(200).json(applications);
     } catch (error) {
         console.error('Error fetching pending accounts:', error);
-        res.status(500).json({ error: 'Server error, please try again later.' });
+        res.status(500).json({ error: 'Failed to fetch pending accounts' });
     }
 });
 
-// Approve account
-app.post('/approve-account/:id', async (req, res) => {
+
+// Approve account route
+// Approve account route (use username instead of accountId)
+app.put('/approve-account/:username', async (req, res) => {
     try {
-        const { id } = req.params;
-        await User.findByIdAndUpdate(id, { approved: true });
-        res.status(200).json({ message: 'Account approved successfully' });
+        const { username } = req.params;
+
+        // Find the application by username
+        const application = await Application.findOne({ username });
+        if (!application) {
+            return res.status(404).json({ error: "Account not found" });
+        }
+
+        // Create the new user from the application
+        const newUser = new User({
+            username: application.username,
+            email: application.email,
+            password: application.password,  // Assuming password is already hashed
+            tier: application.tier,
+            bio: application.bio || null,
+            profilePicture: application.profilePicture || "/img/defaultdp.png",
+            approved: true // Mark as approved
+        });
+
+        await newUser.save();
+        await Application.deleteOne({ username }); // Remove from Application collection
+
+        res.status(200).json({ message: "Account approved and moved to User collection" });
     } catch (error) {
         console.error('Error approving account:', error);
-        res.status(500).json({ error: 'Server error, please try again later.' });
+        res.status(500).json({ error: 'Failed to approve account' });
     }
 });
 
-// Disapprove account
-app.post('/disapprove-account/:id', async (req, res) => {
+
+// Disapprove account route (use username instead of accountId)
+app.delete('/disapprove-account/:username', async (req, res) => {
     try {
-        const { id } = req.params;
-        await User.findByIdAndDelete(id);
-        res.status(200).json({ message: 'Account disapproved and deleted successfully' });
+        const { username } = req.params;
+
+        // Delete the application from the Application collection using the username
+        const application = await Application.deleteOne({ username });
+        if (!application.deletedCount) {
+            return res.status(404).json({ error: "Account not found" });
+        }
+
+        res.status(200).json({ message: "Account disapproved and deleted" });
     } catch (error) {
         console.error('Error disapproving account:', error);
-        res.status(500).json({ error: 'Server error, please try again later.' });
+        res.status(500).json({ error: 'Failed to disapprove account' });
     }
 });
+
 
 // Start Server
 const PORT = process.env.PORT || 3000;
