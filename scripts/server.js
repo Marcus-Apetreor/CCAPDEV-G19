@@ -56,6 +56,44 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(rootDir, 'mainhub.html'));
 });
 
+// Function to hard code admin account for testing
+async function createAdminAccount() {
+    try {
+        const adminUsername = "admin1";
+        const adminEmail = "admin1@gmail.com";
+        const adminPassword = "adminpassword";
+        const adminTier = 4;
+
+        // Check if the admin account already exists
+        const existingAdmin = await User.findOne({ username: adminUsername });
+        if (existingAdmin) {
+            console.log("Test admin account already exists.");
+            return;
+        }
+
+        // Hash the admin password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(adminPassword, salt);
+
+        // Create the admin user
+        const adminUser = new User({
+            username: adminUsername,
+            email: adminEmail,
+            password: hashedPassword,
+            tier: adminTier,
+            bio: null,
+            profilePicture: "/img/defaultdp.png", // Default profile picture
+            approved: true // Auto approve for admin
+        });
+
+        await adminUser.save();
+        console.log("Admin account created successfully.");
+    } catch (error) {
+        console.error("Error creating admin account:", error);
+    }
+}
+createAdminAccount();
+
 app.post('/register', async (req, res) => {
     console.log("Received a request to /register");
     console.log("Request headers:", req.headers);
