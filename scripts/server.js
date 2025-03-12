@@ -8,15 +8,15 @@ const multer = require('multer'); // For handling file uploads
 const path = require('path');
 const User = require('./models/User'); // Import User model
 const Reservation = require("./models/Reservation"); 
+const fs = require('fs');
+
+
+
 
 const app = express();
 
 // Configure CORS to allow requests from your frontend origin
-app.use(cors({
-    origin: 'http://localhost:3000', // Replace with your frontend origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files from the uploads directory
@@ -26,10 +26,16 @@ mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.error("MongoDB Connection Error:", err));
 
-// Configure multer for file uploads
+const imgDir = path.join(__dirname, '..', 'img'); // ✅ Moves "img" outside "scripts"
+
+if (!fs.existsSync(imgDir)) {
+    fs.mkdirSync(imgDir, { recursive: true });
+}
+
+// Configure multer to store profile pictures in "img/" outside "scripts/"
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');
+        cb(null, imgDir); // ✅ Save images to "img/" outside "scripts/"
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
@@ -37,7 +43,18 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Register Route
+// Serve static images correctly
+app.use('/img', express.static(imgDir));
+const rootDir = path.join(__dirname, '..');
+
+// Serve static files (CSS, JS, images, etc.) from the root folder
+app.use(express.static(rootDir));
+
+// Serve mainhub.html when visiting localhost:3000
+app.get("/", (req, res) => {
+    res.sendFile(path.join(rootDir, 'mainhub.html'));
+});
+
 app.post('/register', async (req, res) => {
     console.log("Received a request to /register");
     console.log("Request headers:", req.headers);
@@ -76,6 +93,7 @@ app.post('/register', async (req, res) => {
             password: hashedPassword,
             tier,
             bio: null,
+            profilePicture: "/img/defaultdp.png", // Assign default profile picture
             approved: tier === 1
         });
 
@@ -89,26 +107,37 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// Update Profile Route
+
 app.post('/update-profile', upload.single('profilePicture'), async (req, res) => {
     try {
-        const { bio } = req.body;
-        const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
-        const userId = req.user._id; // Assuming you have user ID in the request
+        const { bio, username } = req.body; // ✅ Use username
 
-        const updatedData = { bio };
-        if (profilePicture) {
-            updatedData.profilePicture = profilePicture;
+        if (!username) {
+            return res.status(400).json({ error: "Username is required" });
         }
 
-        const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+        const profilePicture = req.file ? `/img/${req.file.filename}` : null; // ✅ Correct path
+
+        const updateData = { bio };
+        if (profilePicture) {
+            updateData.profilePicture = profilePicture;
+        }
+
+        const updatedUser = await User.findOneAndUpdate({ username }, updateData, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
         res.status(200).json(updatedUser);
     } catch (error) {
         console.error("Error updating profile:", error);
-        res.status(500).json({ error: "Server error, please try again later" });
+        res.status(500).json({ error: "Server error, please try again later." });
     }
 });
+
+
+
 
 app.post('/login', async (req, res) => {
     try {
@@ -137,7 +166,8 @@ app.post('/login', async (req, res) => {
             user: {
                 username: user.username,
                 email: user.email,
-                tier: user.tier
+                tier: user.tier,
+                profilePicture: user.profilePicture
             }
         });
 
@@ -311,6 +341,24 @@ app.get("/check-student", async (req, res) => {
     }
 });
 
+app.get('/get-user', async (req, res) => {
+    try {
+        const { username } = req.query;
+        if (!username) return res.status(400).json({ error: "Username is required." });
+
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ error: "User not found." });
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        res.status(500).json({ error: "Server error, please try again later." });
+    }
+});
+
+
+
+
 app.get("/user-reservations", async (req, res) => {
     try {
         const { username, date } = req.query;
@@ -350,6 +398,22 @@ app.get("/user-reservations", async (req, res) => {
         res.status(500).json({ error: "Server error, please try again later." });
     }
 });
+
+app.get("/my-reservations", async (req, res) => {
+    try {
+        const { username } = req.query;
+        if (!username) {
+            return res.status(400).json({ error: "Username is required." });
+        }
+
+        const userReservations = await Reservation.find({ username });
+        res.status(200).json(userReservations);
+    } catch (error) {
+        console.error("Error fetching reservations:", error);
+        res.status(500).json({ error: "Server error, please try again later." });
+    }
+});
+
 
 // Fetch pending accounts
 app.get('/pending-accounts', async (req, res) => {

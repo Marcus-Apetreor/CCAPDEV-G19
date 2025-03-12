@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
     const body = document.body;
+    const profilePicElement = document.getElementById("profile-picture");
+
+
 
     // Restricted permissions
     const reserveRoomBtn = document.getElementById('reserveRoomBtn');
@@ -13,11 +16,16 @@ document.addEventListener("DOMContentLoaded", function () {
     // Get logged-in user
     const user = JSON.parse(localStorage.getItem("user"));
 
+
+
     if (user) {
         console.log("User logged in:", user);
         console.log("Username:", user.username);
         console.log("Email:", user.email);
         console.log("Tier:", user.tier);
+
+        profilePicElement.src = user.profilePicture ? user.profilePicture : "img/defaultdp.png";
+
 
         const usernameElement = document.querySelector(".username");
         if (usernameElement) {
@@ -50,11 +58,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function toggleSidebar() {
-        sidebar.classList.toggle('hide');
-        body.classList.toggle('sidebar-hidden');
-    }
 
+  
     checkAccountTier(); // Call after DOM loads
 
     // Logout Functionality
@@ -65,93 +70,136 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // User Profile Button
-    document.getElementById('userProfileBtn').addEventListener('click', () => {
-        mainContent.innerHTML = `
-            <h2>User Profile</h2>
-            <div class="profile-section">
-                <img src="${user.profilePicture || 'resources/profile.jpg'}" alt="Profile Picture" class="profile-picture" id="profile-picture">
-                <br>
-                <span class="username">${user.username}</span>
-                <form id="profileForm">
-                    <label for="profilePicture">Profile Picture:</label>
-                    <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
+    document.getElementById('userProfileBtn').addEventListener('click', async () => {
+        try {
+            // Fetch latest user data from the server
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || !user.username) {
+                alert("Error: User not found. Please log in again.");
+                return;
+            }
+    
+            const response = await fetch(`http://localhost:3000/get-user?username=${user.username}`);
+            if (!response.ok) throw new Error('Failed to fetch user data');
+    
+            const updatedUser = await response.json();
+            localStorage.setItem('user', JSON.stringify(updatedUser)); // Update localStorage
+    
+            // Render User Profile with the latest data
+            mainContent.innerHTML = `
+                <h2>User Profile</h2>
+                <div class="profile-section">
+                    <img src="${updatedUser.profilePicture || 'resources/profile.jpg'}" alt="Profile Picture" class="profile-picture" id="profile-picture2">
                     <br>
-                    <label for="bio">Bio:</label>
-                    <br>
-                    <textarea id="bio" name="bio" rows="4" cols="50">${user.bio || "Enter your bio here..."}</textarea>
-                    <button type="submit">Save</button>
-                </form>
+                    <span class="username">${updatedUser.username}</span>
+                    <form id="profileForm" class="profile-form">
+                        <label for="profilePicture" class="form-label">Profile Picture:</label>
+                        <input type="file" id="profilePicture" name="profilePicture" accept="image/*" class="form-input">
+                        <br>
+                        <label for="bio" class="form-label">Bio:</label>
+                        <br>
+                        <textarea id="bio" name="bio" rows="4" class="form-textarea">${updatedUser.bio || "Enter your bio here..."}</textarea>
+                        <button type="submit" class="form-button">Save</button>
+                    </form>
+                </div>
+            `;
+    
+            // Handle profile update
+            document.getElementById('profileForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+    
+                const bio = document.getElementById('bio').value;
+                const profilePictureInput = document.getElementById('profilePicture');
+                const profilePictureFile = profilePictureInput.files[0];
+    
+                const formData = new FormData();
+                formData.append('username', updatedUser.username);
+                formData.append('bio', bio);
+    
+                if (profilePictureFile) {
+                    formData.append('profilePicture', profilePictureFile);
+                }
+    
+                // Debugging: Log FormData values
+                for (let pair of formData.entries()) {
+                    console.log(pair[0], pair[1]);
+                }
+    
+                try {
+                    const updateResponse = await fetch(`http://localhost:3000/update-profile`, {
+                        method: 'POST',
+                        body: formData
+                    });
+    
+                    if (updateResponse.ok) {
+                        const newUserData = await updateResponse.json();
+                        localStorage.setItem('user', JSON.stringify(newUserData));
+    
+                        alert('Profile updated successfully');
+    
+                        // ✅ Refresh profile picture & bio dynamically
+                        document.getElementById('profile-picture2').src = `${newUserData.profilePicture}?t=${new Date().getTime()}`;
+                        document.querySelector(".profile img").src = `${newUserData.profilePicture}?t=${new Date().getTime()}`;
+                        document.getElementById('bio').value = newUserData.bio;
+                    } else {
+                        alert('Failed to update profile');
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    alert('An error occurred while updating your profile. Please try again.');
+                }
+            });
+    
+        } catch (error) {  // ✅ Properly placed catch block
+            console.error('Error fetching user data:', error);
+            alert('Could not load profile data. Please try again.');
+        }
+    });
+    
+
+    document.getElementById('myReservationsBtn').addEventListener('click', async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || !user.username) {
+            alert("Error: User not found. Please log in again.");
+            return;
+        }
+    
+        try {
+            const response = await fetch(`http://localhost:3000/my-reservations?username=${user.username}`);
+            const reservations = await response.json();
+    
+            let tableRows = reservations.map(reservation => `
+                <tr>
+                    <td>${reservation.room}</td>
+                    <td>${reservation.seat || "N/A"}</td>
+                    <td>${reservation.date}</td>
+                    <td>${reservation.timeslot}</td>
+                </tr>
+            `).join('');
+    
+            mainContent.innerHTML = `
+            <h2>My Reservations</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Room</th>
+                            <th>Seat</th>
+                            <th>Date</th>
+                            <th>Time Slot</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
             </div>
         `;
-
-        document.getElementById('profileForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const bio = document.getElementById('bio').value;
-            const profilePictureInput = document.getElementById('profilePicture');
-            const profilePictureFile = profilePictureInput.files[0];
-
-            const formData = new FormData();
-            formData.append('bio', bio);
-            if (profilePictureFile) {
-                formData.append('profilePicture', profilePictureFile);
-            }
-
-            try {
-                const response = await fetch(`http://localhost:3000/update-profile`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const updatedUser = await response.json();
-                    localStorage.setItem('user', JSON.stringify(updatedUser));
-                    alert('Profile updated successfully');
-                    document.getElementById('profile-picture').src = updatedUser.profilePicture || 'resources/profile.jpg';
-                } else {
-                    alert('Failed to update profile');
-                }
-            } catch (error) {
-                console.error('Error updating profile:', error);
-                alert('An error occurred while updating your profile. Please try again.');
-            }
-        });
-    });
-
-    // My Reservations Button
-    document.getElementById('myReservationsBtn').addEventListener('click', () => {
-        // Example data
-        const reservations = [
-            { roomNumber: '101', seat: '1', timeSlot: '10:30 AM - 11:00 AM' },
-            { roomNumber: '102', seat: '3', timeSlot: '11:30 AM - 12:00 PM' },
-            { roomNumber: '103', seat: '5', timeSlot: '12:30 PM - 01:00 PM' },
-            { roomNumber: '102', seat: '2', timeSlot: '1:30 AM - 2:00 PM' },
-            { roomNumber: '103', seat: '6', timeSlot: '2:30 PM - 3:00 PM' }
-        ];
-
-        let tableRows = reservations.map(reservation => `
-            <tr>
-                <td>${reservation.roomNumber}</td>
-                <td>${reservation.seat}</td>
-                <td>${reservation.timeSlot}</td>
-            </tr>
-        `).join('');
-
-        mainContent.innerHTML = `
-            <h2>My Reservations</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room Number</th>
-                        <th>Seat</th>
-                        <th>Time Slot</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-        `;
+        
+        } catch (error) {
+            console.error("Error fetching reservations:", error);
+            alert("An error occurred while fetching reservations. Please try again.");
+        }
     });
 
     // Reserve a Room Button
@@ -257,3 +305,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 });
+
+function toggleSidebar() {
+    sidebar.classList.toggle('hide');
+    body.classList.toggle('sidebar-hidden');
+}

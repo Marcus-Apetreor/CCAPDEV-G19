@@ -422,13 +422,21 @@ select:focus, input[type="date"]:focus {
 
     <script>
         const seatSelect = document.getElementById("seat-selection");
-        for (let i = 101; i <= 120; i++) {
-            let option = document.createElement("option");
-            option.value = `L${i}`;
-            option.textContent = `Lab L${i}`;
-            seatSelect.appendChild(option);
-        }
+        // Generate options for GK200-GK210
+for (let i = 200; i <= 210; i++) {
+    let option = document.createElement("option");
+    option.value = `GK${i}`;
+    option.textContent = `Lab GK${i}`;
+    seatSelect.appendChild(option);
+}
 
+// Generate options for GK300-GK310
+for (let i = 300; i <= 310; i++) {
+    let option = document.createElement("option");
+    option.value = `GK${i}`;
+    option.textContent = `Lab GK${i}`;
+    seatSelect.appendChild(option);
+}
           // Slideshow functionality
           let slideIndex = 0;
             const slides = document.querySelectorAll(".slides img");

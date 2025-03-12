@@ -189,3 +189,127 @@ main table th, main table td {
     padding: 0.5em;
     text-align: center;
 }
+
+/* Profile Section - Now Wider */
+.profile-section {
+    background-color: var(--sidebar-color);
+    padding: 1.5em;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 600px; /* Increased width */
+    margin: 0 auto; /* Centered */
+}
+
+/* Profile Picture */
+.profile-section .profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-color);
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+/* Form - Centering Inputs */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Form Label */
+.profile-form .form-label {
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: left;
+    width: 100%; /* Full width for better alignment */
+}
+
+/* Form Inputs - Centered */
+.profile-form .form-input,
+.profile-form .form-textarea {
+    width: 90%; /* Slightly smaller than container width */
+    padding: 12px;
+    margin-top: 5px;
+    font-size: 14px;
+    border: 1px solid var(--input-color);
+    border-radius: 5px;
+    background-color: white;
+    color: var(--text-color);
+    text-align: center; /* Center text inside inputs */
+}
+
+/* Bio Textarea */
+.profile-form .form-textarea {
+    height: 120px;
+    resize: none;
+}
+
+/* Save Button - Centered */
+.profile-form .form-button {
+    width: 90%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: var(--accent-color);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.profile-form .form-button:hover {
+    background-color: var(--text-color);
+    color: var(--accent-color);
+}
+
+.profile-form .form-button:active {
+    transform: scale(0.98);
+}
+
+/* My Reservations Table */
+main table {
+    width: 90%; /* Increased width for better use of space */
+    margin: 20px auto; /* Centered */
+    border-collapse: collapse;
+    background-color: white; /* Clean background */
+    border-radius: 10px;
+    overflow: hidden; /* Ensures border radius applies properly */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow effect */
+}
+
+/* Table Headers */
+main table thead {
+    background-color: var(--accent-color); /* Accent color for the header */
+    color: white; /* White text for contrast */
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+main table th, main table td {
+    padding: 12px; /* More padding for better spacing */
+    text-align: center;
+    border-bottom: 1px solid var(--sidebar-color); /* Subtle border */
+}
+
+/* Alternating Row Colors */
+main table tbody tr:nth-child(even) {
+    background-color: #f8f8f8; /* Light grey */
+}
+
+/* Hover Effect */
+main table tbody tr:hover {
+    background-color: var(--base-color); /* Light greenish tone */
+    transition: background-color 0.3s;
+}
+
+/* Responsive Table - Ensure it adapts on smaller screens */
+@media (max-width: 800px) {
+    main table {
+        width: 100%;
+        font-size: 12px; /* Slightly smaller font */
+    }
+}

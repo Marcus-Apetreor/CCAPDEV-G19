@@ -143,11 +143,17 @@ async function submitReservation(usernameOverride = null) {
 
     errorMessage.textContent = ""; // Clear previous errors
 
-    // Process each selected seat as a separate reservation
-    let successfulReservations = 0;
-    let failedReservations = 0;
+    // Prevent Tier 1 & 2 from reserving multiple seats
+if ((userTier === 1 || userTier === 2) && selectedSeats.length > 1) {
+    errorMessage.textContent = "Error: You can only reserve one seat at a time.";
+    return;
+}
 
-    for (let seat of selectedSeats) {
+// Process each selected seat as a separate reservation
+let successfulReservations = 0;
+let failedReservations = 0;
+
+for (let seat of selectedSeats) {
         try {
             // Check for conflicts
             const checkResponse = await fetch("http://localhost:3000/check-reservation", {
