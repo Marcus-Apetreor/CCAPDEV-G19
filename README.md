@@ -24,15 +24,37 @@ AnimoHub is a web application designed to streamline room and seat reservations 
 - Users can delete their accounts (clears reservations); admins can delete any account except other admins.
 
 ## Installation Instructions
-1. Clone the repository.
-2. Install dependencies (Node.js).
-3. Set up a database (MongoDB).
-5. Run the server and access via a web browser.
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Marcus-Apetreor/CCAPDEV-G19.git
+   cd CCAPDEV-G19
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up the database:
+   - Ensure MongoDB is installed and running.
+   - Configure the database connection in the environment variables.
+
+4. Populate the database with sample data:
+   - Ensure there are at least 5 sample data entries for each applicable feature (e.g., users, rooms, reservations).
+
+5. Run the server:
+   ```bash
+   node server.js
+   ```
+
+6. Access the application via a web browser at `http://localhost:3000`.
 
 ## Usage Instructions
 
 ### Registration/Login
 - Students register as Tier 1; Tier 2–3 require admin approval.
+- Enable "Remember Me" to extend login sessions by 3 weeks.
 
 ### Reserving a Room/Seat
 - Select room type, time slot, and confirm.
@@ -44,6 +66,12 @@ AnimoHub is a web application designed to streamline room and seat reservations 
 ### Searching Rooms
 - Use filters to check availability and view public profiles of reservers.
 
+## Contribution Guidelines
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Submit pull requests for review.
 
 ## License Information
+
 License information is not provided.
