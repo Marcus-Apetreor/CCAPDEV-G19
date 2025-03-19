@@ -130,7 +130,7 @@ app.post('/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        if (tier === 2 || tier === 3) {
+        if (tier === 2 || tier === 3 || tier === 4) {
             // Store tier 2 or 3 users in the Application database
             const newApplication = new Application({
                 username,
