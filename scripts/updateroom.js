@@ -154,7 +154,14 @@ function editReservation(index) {
     // Show modal
     const editModal = new bootstrap.Modal(document.getElementById("editModal"));
     editModal.show();
+
+    // Attach event listener to handle validation on submission
+    document.getElementById("editReservationForm").onsubmit = function (event) {
+        event.preventDefault();
+        saveEditedReservation();
+    };
 }
+
 
 
 
@@ -166,32 +173,49 @@ function getTimeBlock(start, end) {
 document.getElementById("editForm").addEventListener("submit", async function (event) {
     event.preventDefault();
 
+    const usernameInput = document.getElementById("editUsername").value.trim();
     const updatedSeat = document.getElementById("editSeat").disabled ? null : document.getElementById("editSeat").value.trim();
     let updatedTimeBlock = document.getElementById("editTimeBlock").value;
 
-    // If using Start & End Time, convert it to Time Block format
-    if (!document.getElementById("editSeat").disabled) {
-        const startTime = document.getElementById("start-time").value;
-        const endTime = document.getElementById("end-time").value;
-        updatedTimeBlock = getTimeBlock(startTime, endTime);
+    // 🔹 Step 1: Validate Username Input
+    if (!usernameInput) {
+        alert("Please enter a valid username.");
+        return;
     }
 
-    const updatedReservation = {
-        originalUsername, 
-        originalRoom, 
-        originalDate, // Ensure this is set
-        originalTimeblock, // Ensure this is set
-        username: document.getElementById("editUsername").value,
-        room: document.getElementById("editRoom").value,
-        seat: updatedSeat,
-        date: document.getElementById("editDate").value,
-        timeslot: updatedTimeBlock
-    };
-
-    // 🔹 Log the data before sending it to the backend
-    console.log("Sending update request with data:", updatedReservation);
-
     try {
+        // 🔹 Step 2: Check if the Username Exists in the Database
+        const usernameResponse = await fetch(`http://localhost:3000/check-student?username=${usernameInput}`);
+        const usernameResult = await usernameResponse.json();
+
+        if (!usernameResult.exists) {
+            alert("Student not found. Please enter a valid username.");
+            return;
+        }
+
+        // If using Start & End Time, convert it to Time Block format
+        if (!document.getElementById("editSeat").disabled) {
+            const startTime = document.getElementById("start-time").value;
+            const endTime = document.getElementById("end-time").value;
+            updatedTimeBlock = getTimeBlock(startTime, endTime);
+        }
+
+        const updatedReservation = {
+            originalUsername, 
+            originalRoom, 
+            originalDate, // Ensure this is set
+            originalTimeblock, // Ensure this is set
+            username: usernameInput,
+            room: document.getElementById("editRoom").value,
+            seat: updatedSeat,
+            date: document.getElementById("editDate").value,
+            timeslot: updatedTimeBlock
+        };
+
+        // 🔹 Log the data before sending it to the backend
+        console.log("Sending update request with data:", updatedReservation);
+
+        // 🔹 Step 3: Proceed with Updating Reservation
         const response = await fetch("http://localhost:3000/update-reservation", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -212,6 +236,8 @@ document.getElementById("editForm").addEventListener("submit", async function (e
         alert("An error occurred. Please try again.");
     }
 });
+
+
 
 function generateTimeOptions(selectElement, startHour, startMinute) {
     selectElement.innerHTML = ""; // Clear existing options
@@ -348,7 +374,6 @@ document.getElementById("addRoomType").addEventListener("change", function () {
 });
 
 
-
 function addReservation(event) {
     event.preventDefault();
 
@@ -364,72 +389,88 @@ function addReservation(event) {
 
     const user = JSON.parse(localStorage.getItem("user"));
     const userTier = user.tier;
+    const enteredUsername = document.getElementById("addUsername").value.trim();
 
-    const newReservation = {
-        room: document.getElementById("addRoom").value,
-        roomType: selectedRoomType,
-        date: document.getElementById("addDate").value,
-        timeslot: timeBlockValue,
-        seat: selectedRoomType === "complab" ? (document.getElementById("addSeat").value || null) : null,
-        username: document.getElementById("addUsername").value,
-        userTier: userTier
-    };
+    if (!enteredUsername) {
+        alert("Please enter a valid username.");
+        return;
+    }
 
-    // **Step 1: Check for existing reservations**
-    fetch("http://localhost:3000/check-reservation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            room: newReservation.room,
-            roomType: newReservation.roomType,
-            date: newReservation.date,
-            timeslot: newReservation.timeslot,
-            seat: newReservation.seat,
-            userTier: newReservation.userTier
-        })
-    })
-    .then(response => response.json())
-    .then(checkResult => {
-        if (checkResult.requireConfirmation) {
-            // **Step 2: Ask user for confirmation before overwriting**
-            const userConfirmed = confirm(checkResult.message);
-            if (!userConfirmed) {
-                alert("Reservation not made.");
-                return; // Stop if user declines to overwrite
+    // **Step 1: Validate Username Existence**
+    fetch(`http://localhost:3000/check-student?username=${enteredUsername}`)
+        .then(response => response.json())
+        .then(result => {
+            if (!result.exists) {
+                alert("Student not found. Please enter a valid username.");
+                throw new Error("Invalid username");
             }
 
-            // **Step 3: Proceed with reservation (with overwrite if needed)**
-            newReservation.confirmOverwrite = true;
+            // **Step 2: Create Reservation Object**
+            const newReservation = {
+                room: document.getElementById("addRoom").value,
+                roomType: selectedRoomType,
+                date: document.getElementById("addDate").value,
+                timeslot: timeBlockValue,
+                seat: selectedRoomType === "complab" ? (document.getElementById("addSeat").value || null) : null,
+                username: enteredUsername,
+                userTier: userTier
+            };
 
-            return fetch("http://localhost:3000/reserve", {
+            // **Step 3: Check for Existing Reservations**
+            return fetch("http://localhost:3000/check-reservation", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newReservation)
-            });
-        } else {
-            // No confirmation needed, directly proceed with reservation
-            return fetch("http://localhost:3000/reserve", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newReservation)
-            });
-        }
-    })
-    .then(reserveResponse => reserveResponse.json())
-    .then(reserveResult => {
-        if (reserveResult.message === "Reservation successful!") {
-            alert("Reservation successful!");
-            fetchReservations(); // Refresh the table after reservation is added
-            bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
-        } else {
-            alert(`Error: ${reserveResult.error}`);
-        }
-    })
-    .catch(error => {
-        console.error("Error adding reservation:", error);
-        alert("An error occurred while adding the reservation.");
-    });
+                body: JSON.stringify({
+                    room: newReservation.room,
+                    roomType: newReservation.roomType,
+                    date: newReservation.date,
+                    timeslot: newReservation.timeslot,
+                    seat: newReservation.seat,
+                    userTier: newReservation.userTier
+                })
+            }).then(response => response.json().then(checkResult => ({ checkResult, newReservation })));
+        })
+        .then(({ checkResult, newReservation }) => {
+            if (checkResult.requireConfirmation) {
+                // **Step 4: Ask for Confirmation if Needed**
+                const userConfirmed = confirm(checkResult.message);
+                if (!userConfirmed) {
+                    alert("Reservation not made.");
+                    throw new Error("User canceled reservation");
+                }
+
+                // **Step 5: Proceed with Overwrite**
+                return fetch("http://localhost:3000/reserve", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...newReservation, confirmOverwrite: true })
+                });
+            } else {
+                // **Step 6: Directly Proceed with Reservation**
+                return fetch("http://localhost:3000/reserve", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newReservation)
+                });
+            }
+        })
+        .then(reserveResponse => reserveResponse.json())
+        .then(reserveResult => {
+            if (reserveResult.message === "Reservation successful!") {
+                alert("Reservation successful!");
+                fetchReservations(); // Refresh table
+                bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+            } else {
+                alert(`Error: ${reserveResult.error}`);
+            }
+        })
+        .catch(error => {
+            console.error("Error adding reservation:", error);
+            
+        });
 }
+
+
 
 
 
@@ -439,6 +480,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedRoomType = document.getElementById("addRoomType").value;
     const startTimeSelect = document.getElementById("add-start-time");
     const endTimeSelect = document.getElementById("add-end-time");
+
+    // Set minimum selectable date to today
+    const dateInput = document.getElementById("addDate");
+    const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+    dateInput.setAttribute("min", today);
+
+    // Set minimum selectable date to today
+    const editDateInput = document.getElementById("editDate");
+    
+    editDateInput.setAttribute("min", today);
+
 
     if (selectedRoomType === "complab") {
         // If "Computer Lab" is selected, populate Start and End Time
