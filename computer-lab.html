@@ -284,6 +284,23 @@ select:focus, input[type="date"]:focus {
             color: white;
         }
 
+.seat.reserved {
+    background-color: #CB4C4E;
+    color: white;
+    cursor: not-allowed;
+}
+
+/* Reserved seats that Tier 3 and 4 users can select */
+.seat.reserved.selectable {
+    background-color: #CB4C4E;
+    cursor: pointer;
+}
+
+/* Ensure Tier 3 & 4 can select reserved seats and turn them green */
+.seat.reserved.selectable.selected {
+    background-color: green !important;
+}
+
         #reserveForStudentContainer {
     display: flex;
     align-items: center;

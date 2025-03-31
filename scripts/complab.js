@@ -200,6 +200,7 @@ for (let seat of selectedSeats) {
     // Notify user
     if (successfulReservations > 0) {
         alert(`Successfully reserved ${successfulReservations} seat(s) for ${timeslot}.`);
+        fetchTakenSeats();
     }
     if (failedReservations > 0) {
         alert(`Failed to reserve ${failedReservations} seat(s). Some may already be booked.`);
@@ -207,10 +208,91 @@ for (let seat of selectedSeats) {
 }
 
 
+async function fetchTakenSeats() {
+    const selectedRoom = document.getElementById("seat-selection").value;
+    const selectedDate = document.getElementById("date-selection").value;
+    const startTime = document.getElementById("start-time").value;
+    const endTime = document.getElementById("end-time").value;
+
+
+   
+
+    if (!selectedRoom || !selectedDate || !startTime || !endTime) return;
+
+    const timeslot = `${startTime} - ${endTime}`;
+
+    try {
+        const response = await fetch("http://localhost:3000/check-reservation-seats", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ room: selectedRoom, date: selectedDate, timeslot })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            updateSeatGrid(data.takenSeats);
+        } else {
+            console.error("Error fetching reservations:", data.error);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+
+function updateSeatGrid(takenSeats) {
+    const seatGrid = document.getElementById("seat-grid");
+    seatGrid.innerHTML = "";
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userTier = user ? user.tier : 0; 
+
+    for (let i = 1; i <= 25; i++) {
+        let seatBox = document.createElement("div");
+        seatBox.classList.add("seat");
+        seatBox.textContent = `S${i}`;
+
+        if (takenSeats.includes(`S${i}`)) {
+            seatBox.classList.add("reserved");
+
+            if (userTier === 3 || userTier === 4) {
+                seatBox.classList.add("selectable");
+                seatBox.onclick = function () {
+                    seatBox.classList.toggle("selected");
+
+                    // Ensure reserved seats turn green when selected
+                    if (seatBox.classList.contains("selected")) {
+                        seatBox.style.backgroundColor = "green";
+                    } else {
+                        seatBox.style.backgroundColor = "#CB4C4E";
+                    }
+                };
+            }
+        } else {
+            seatBox.onclick = function () {
+                seatBox.classList.toggle("selected");
+            };
+        }
+
+        seatGrid.appendChild(seatBox);
+    }
+}
+
+
+
+
+
+
+
 
 // Ensure button is correctly linked to the function
 document.addEventListener("DOMContentLoaded", () => {
-   
+    document.getElementById("seat-selection").addEventListener("change", fetchTakenSeats);
+    document.getElementById("date-selection").addEventListener("change", fetchTakenSeats);
+    document.getElementById("start-time").addEventListener("change", fetchTakenSeats);
+    document.getElementById("end-time").addEventListener("change", fetchTakenSeats);
+    
 
     // Set min date to today
     const dateInput = document.getElementById("date-selection");

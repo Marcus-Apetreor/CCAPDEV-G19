@@ -278,11 +278,11 @@ app.post("/check-reservation", async (req, res) => {
                 // **Enforce Tier-Based Overwriting Rules**
                 const canOverwrite = 
                     (userTier === 3 && existingUserTier <= 2) ||  // Tier 3 can overwrite Tier 1 and 2
-                    (userTier === 4 && existingUserTier <= 3);   // Tier 4 can overwrite Tier 1, 2, and 3
+                    (userTier === 4);   // Tier 4 can overwrite Tier 1, 2, and 3
 
                 if (canOverwrite) {
                     return res.status(200).json({
-                        message: `There is already a reservation by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                        message: `There is already a reservation by another user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
                         requireConfirmation: true
                     });
                 } else {
@@ -292,6 +292,50 @@ app.post("/check-reservation", async (req, res) => {
         }
 
         res.status(200).json({ message: "No conflicts found. You can proceed with the reservation." });
+    } catch (error) {
+        console.error("Check Reservation Error:", error);
+        res.status(500).json({ error: "Server error, please try again later" });
+    }
+});
+
+app.post("/check-reservation-seats", async (req, res) => {
+    try {
+        const { room, date, timeslot } = req.body;
+
+        if (!room || !date || !timeslot) {
+            return res.status(400).json({ error: "Room, date, and timeslot are required" });
+        }
+
+        function parseTime(timeString) {
+            let [time, modifier] = timeString.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+        }
+
+        const newStart = parseTime(timeslot.split(" - ")[0]);
+        const newEnd = parseTime(timeslot.split(" - ")[1]);
+
+        let conflictingReservations = await Reservation.find({ room, date });
+
+        let takenSeats = [];
+
+        for (let reservation of conflictingReservations) {
+            const existingStart = parseTime(reservation.timeslot.split(" - ")[0]);
+            const existingEnd = parseTime(reservation.timeslot.split(" - ")[1]);
+
+            if (!(newEnd <= existingStart || newStart >= existingEnd)) {
+                if (reservation.seat) {
+                    takenSeats.push(reservation.seat);
+                }
+            }
+        }
+
+        res.status(200).json({
+            message: "Checked reservations.",
+            takenSeats: takenSeats
+        });
     } catch (error) {
         console.error("Check Reservation Error:", error);
         res.status(500).json({ error: "Server error, please try again later" });
@@ -354,11 +398,11 @@ app.post("/reserve", async (req, res) => {
                     // **Enforce Tier-Based Overwriting Rules**
                     const canOverwrite = 
                         (userTier === 3 && existingUserTier <= 2) ||  // Tier 3 can overwrite Tier 1 and 2
-                        (userTier === 4 && existingUserTier <= 3);   // Tier 4 can overwrite Tier 1, 2, and 3
+                        (userTier === 4);   // Tier 4 can overwrite Tier 1, 2, and 3
     
                     if (canOverwrite) {
                         return res.status(200).json({
-                            message: `There is already a reservation by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                            message: `There is already a reservation by another user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
                             requireConfirmation: true
                         });
                     } else {
@@ -382,7 +426,7 @@ app.post("/reserve", async (req, res) => {
                 if (existingUserTier < userTier) {
                     if (!confirmOverwrite) {
                         return res.status(200).json({
-                            message: `This room is already reserved by a lower-tier user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
+                            message: `This room is already reserved by another user (Tier ${existingUserTier}). Do you want to overwrite their reservation?`,
                             requireConfirmation: true
                         });
                     } else {
