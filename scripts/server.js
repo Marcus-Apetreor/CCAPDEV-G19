@@ -56,43 +56,82 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(rootDir, 'mainhub.html'));
 });
 
-// Function to hard code admin account for testing
-async function createAdminAccount() {
+
+async function createUsersFromSampleData() {
     try {
-        const adminUsername = "admin1";
-        const adminEmail = "admin1@gmail.com";
-        const adminPassword = "adminpassword";
-        const adminTier = 4;
+        // load sample data
+        const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-users.json', 'utf-8'));
 
-        // Check if the admin account already exists
-        const existingAdmin = await User.findOne({ username: adminUsername });
-        if (existingAdmin) {
-            console.log("Test admin account already exists.");
-            return;
+        for (const userData of sampleData) {
+            const { username, email, password, tier, bio, profilePicture, approved } = userData;
+
+            // check if user already exists
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                console.log(`User with email ${email} already exists.`);
+                continue;
+            }
+
+            // hash password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            // create new user
+            const newUser = new User({
+                username,
+                email,
+                password: hashedPassword,
+                tier,
+                bio: bio || null,
+                profilePicture: profilePicture || "/img/defaultdp.png",
+                approved: approved !== undefined ? approved : false // default false if not specified
+            });
+
+            await newUser.save();
+            console.log(`User ${username} created successfully.`);
         }
-
-        // Hash the admin password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(adminPassword, salt);
-
-        // Create the admin user
-        const adminUser = new User({
-            username: adminUsername,
-            email: adminEmail,
-            password: hashedPassword,
-            tier: adminTier,
-            bio: null,
-            profilePicture: "/img/defaultdp.png", // Default profile picture
-            approved: true // Auto approve for admin
-        });
-
-        await adminUser.save();
-        console.log("Admin account created successfully.");
     } catch (error) {
-        console.error("Error creating admin account:", error);
+        console.error("Error creating users:", error);
     }
 }
-createAdminAccount();
+createUsersFromSampleData();
+
+
+async function createReservationsFromSampleData() {
+    try {
+        // load sample reservation data
+        const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-reservations.json', 'utf-8'));
+
+        for (const reservationData of sampleData) {
+            const { room, roomType, date, timeslot, seat, username } = reservationData;
+
+            // check if the same reservation already exists
+            const existingReservation = await Reservation.findOne({ room, date, timeslot, seat, username });
+            if (existingReservation) {
+                console.log(`Reservation for ${username} in room ${room} on ${date} at ${timeslot} already exists.`);
+                continue;
+            }
+
+            // create new reservation
+            const newReservation = new Reservation({
+                room,
+                roomType,
+                date,
+                timeslot,
+                seat: seat || null, // default to null if not specified
+                username
+            });
+
+            await newReservation.save();
+            console.log(`Reservation for ${username} in room ${room} on ${date} at ${timeslot} created successfully.`);
+        }
+    } catch (error) {
+        console.error("Error creating reservations:", error);
+    }
+}
+createReservationsFromSampleData();
+
+
 
 app.post('/register', async (req, res) => {
     console.log("Received a request to /register");
