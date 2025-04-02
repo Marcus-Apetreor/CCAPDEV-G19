@@ -406,12 +406,16 @@ async function disapproveAccount(username, index) {
 
 
 <<<<<<< Updated upstream:scripts/hubscripts.js
+<<<<<<< Updated upstream:scripts/hubscripts.js
 });
 
 function toggleSidebar() {
     sidebar.classList.toggle('hide');
     body.classList.toggle('sidebar-hidden');
 }
+=======
+});
+>>>>>>> Stashed changes:controllers/hubscripts.js
 =======
 });
 >>>>>>> Stashed changes:controllers/hubscripts.js

@@ -102,8 +102,12 @@ async function createUsersFromSampleData() {
     try {
         // load sample data
 <<<<<<< Updated upstream:scripts/server.js
+<<<<<<< Updated upstream:scripts/server.js
         const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-users.json', 'utf-8'));
 
+=======
+        const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-users.json', 'utf-8'));
+>>>>>>> Stashed changes:controllers/server.js
 =======
         const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-users.json', 'utf-8'));
 >>>>>>> Stashed changes:controllers/server.js
@@ -152,8 +156,12 @@ async function createReservationsFromSampleData() {
     try {
         // load sample reservation data
 <<<<<<< Updated upstream:scripts/server.js
+<<<<<<< Updated upstream:scripts/server.js
         const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-reservations.json', 'utf-8'));
 
+=======
+        const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-reservations.json', 'utf-8'));
+>>>>>>> Stashed changes:controllers/server.js
 =======
         const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-reservations.json', 'utf-8'));
 >>>>>>> Stashed changes:controllers/server.js
