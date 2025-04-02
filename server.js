@@ -6,10 +6,10 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs'); // For password hashing
 const multer = require('multer'); // For handling file uploads
 const path = require('path');
-const User = require('../models/User.js'); // Import User model
-const Reservation = require("../models/Reservation.js"); 
+const User = require('./models/User.js'); // Import User model
+const Reservation = require("./models/Reservation.js"); 
 const fs = require('fs');
-const Application = require("../models/Application.js"); 
+const Application = require("./models/Application.js"); 
 const session = require('express-session');
 
 const app = express();
@@ -68,7 +68,7 @@ mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.error("MongoDB Connection Error:", err));
 
-const imgDir = path.join(__dirname, '..', 'views', 'img'); // ✅ Moves "img" outside "scripts"
+const imgDir = path.join(__dirname, '.', 'views', 'img'); // ✅ Moves "img" outside "scripts"
 
 if (!fs.existsSync(imgDir)) {
     fs.mkdirSync(imgDir, { recursive: true });
@@ -89,21 +89,21 @@ const upload = multer({ storage });
 app.use('/img', express.static(imgDir)); // Serve static images from 'img' folder
 
 
-const rootDir = path.join(__dirname, '..');
+const rootDir = path.join(__dirname, '.');
 
 // Serve static files from the root directory
 app.use(express.static(rootDir));
 
 // Serve mainhub.html when visiting localhost:3000
 app.get("/", (req, res) => {
-    res.sendFile(path.join(rootDir, 'views', 'mainhub.html'));
+    res.sendFile(path.join(rootDir, '.', 'views', 'mainhub.html'));
 });
 
 
 async function createUsersFromSampleData() {
     try {
         // load sample data
-        const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-users.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync('./controllers/sample_data/sample-users.json', 'utf-8'));
         for (const userData of sampleData) {
             const { username, email, password, tier, bio, profilePicture, approved } = userData;
 
@@ -148,7 +148,7 @@ function checkAuth(req, res, next) {
 async function createReservationsFromSampleData() {
     try {
         // load sample reservation data
-        const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-reservations.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync('./controllers/sample_data/sample-reservations.json', 'utf-8'));
         for (const reservationData of sampleData) {
             const { room, roomType, date, timeslot, seat, username } = reservationData;
 
@@ -831,7 +831,7 @@ app.use('/styles', express.static(path.join(__dirname, 'styles')));
 
 // Serve the main HTML file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'mainhub.html'));
+    res.sendFile(path.join(__dirname,'.', 'views', 'mainhub.html'));
   });
   
 
