@@ -71,9 +71,8 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             try {
-                const response = await loginUser(data);
+                const responseText = await loginUser(data);
 
-                const responseText = await response.text();
                 console.log("Raw response:", responseText);
 
                 if (response.ok) {

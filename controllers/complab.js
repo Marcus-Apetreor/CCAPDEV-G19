@@ -129,7 +129,6 @@ async function submitReservation(usernameOverride = null) {
     let dailyReservedMinutes = 0;
     try {
         const response = await checkStudent(enteredUsername);
-        const data = await response.json();
 
         if (response.ok) {
             dailyReservedMinutes = data.totalMinutes;

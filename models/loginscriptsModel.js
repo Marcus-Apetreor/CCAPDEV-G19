@@ -33,7 +33,7 @@ async function loginUser(data) {
             throw new Error(error.error || "Invalid username or password.");
         }
 
-        return await response.json(); // Return the parsed JSON response
+        return await response.text(); // Return the parsed JSON response
     } catch (error) {
         console.error("Error logging in user:", error);
         throw error; // Re-throw the error for the caller to handle
