@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (logoutBtn) {
         logoutBtn.addEventListener("click", function () {
             localStorage.removeItem("user"); // Clear user data
-            window.location.href = "loginpage.html"; // Redirect to login page
+            window.location.href = "../views/loginpage.html"; // Redirect to login page
         });
     }
 
