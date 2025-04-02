@@ -6,7 +6,7 @@ import {
     fetchPendingAccounts,
     approveAnAccount,
     disapproveAnAccount
-} from "../models/hubscriptsModel.js";
+} from "/models/hubscriptsModel.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById('sidebar');
@@ -387,8 +387,3 @@ async function disapproveAccount(username, index) {
 
 
 });
-
-function toggleSidebar() {
-    sidebar.classList.toggle('hide');
-    body.classList.toggle('sidebar-hidden');
-}
