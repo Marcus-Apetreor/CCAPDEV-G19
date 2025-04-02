@@ -1,7 +1,7 @@
-const { 
+import { 
     registerUser,
     loginUser
- } = require("../models/loginscriptsModel");
+ } from "/models/loginscriptsModel.js";
 
 function showForm(formType) {
     document.getElementById('login-form').classList.remove('active');

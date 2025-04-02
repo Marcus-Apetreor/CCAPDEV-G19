@@ -5,7 +5,7 @@ import {
     checkStudent,
     checkReservation,
     reserveRoom
-} from "../models/updateroomModel.js";
+} from "/models/updateroomModel.js";
     
 const filterDropdown = document.getElementById("filterRoomType");
 const searchInput = document.getElementById("searchRoom");

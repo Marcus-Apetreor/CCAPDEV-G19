@@ -6,7 +6,7 @@ import {
     fetchPendingAccounts,
     approveAnAccount,
     disapproveAnAccount
-} from "../models/hubscriptsModel.js";
+} from "/models/hubscriptsModel.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById('sidebar');
@@ -25,8 +25,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Get logged-in user
     const user = JSON.parse(localStorage.getItem("user"));
-
-
 
     if (user) {
         console.log("User logged in:", user);
