@@ -1,8 +1,3 @@
-import { 
-    registerUser,
-    loginUser
- } from "../models/loginscriptsModel.js";
-
 function showForm(formType) {
     document.getElementById('login-form').classList.remove('active');
     document.getElementById('signup-form').classList.remove('active');
@@ -17,6 +12,22 @@ function showForm(formType) {
         document.getElementById('signup-btn').classList.add('active');
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const loginBtn = document.getElementById("login-btn");
+    const signupBtn = document.getElementById("signup-btn");
+
+    if (loginBtn && signupBtn) {
+        loginBtn.addEventListener("click", function () {
+            showForm("login");
+        });
+
+        signupBtn.addEventListener("click", function () {
+            showForm("signup");
+        });
+    }
+});
+
 
 // Show login form by default
 showForm('login');
@@ -38,7 +49,13 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             try {
-                const response = registerUser(data);
+                const response = await fetch("http://localhost:3000/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
 
                 const responseText = await response.text();
                 console.log("Raw response:", responseText);
@@ -46,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (response.ok) {
                     const result = JSON.parse(responseText);
                     alert(result.message);
-                    window.location.href = "/views/loginpage.html";
+                    window.location.href = "loginpage.html";
                 } else {
                     const error = JSON.parse(responseText);
                     alert(error.error || "An error occurred while registering.");
@@ -71,8 +88,15 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
             try {
-                const responseText = await loginUser(data);
+                const response = await fetch("http://localhost:3000/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
 
+                const responseText = await response.text();
                 console.log("Raw response:", responseText);
 
                 if (response.ok) {
@@ -83,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     localStorage.setItem("user", JSON.stringify(result.user));
 
                     // Redirect to the dashboard or home page
-                    window.location.href = "/views/mainhub.html";
+                    window.location.href = "mainhub.html";
                 } else {
                     const error = JSON.parse(responseText);
                     alert(error.error || "Invalid username or password.");
@@ -100,18 +124,18 @@ document.addEventListener("DOMContentLoaded", function () {
     if (logoutButton) {
         logoutButton.addEventListener("click", function () {
             localStorage.removeItem("user");
-            window.location.href = "/views/loginpage.html";
+            window.location.href = "loginpage.html";
         });
     }
 });
 
 // PROTECT DASHBOARD: Redirect users who are not logged in
 document.addEventListener("DOMContentLoaded", function () {
-    if (window.location.pathname.includes("/views/mainhub.html")) {
+    if (window.location.pathname.includes("mainhub.html")) {
         const user = JSON.parse(localStorage.getItem("user"));
         if (!user) {
             alert("Please log in first.");
-            window.location.href = "/views/loginpage.html";
+            window.location.href = "loginpage.html";
         }
     }
 });

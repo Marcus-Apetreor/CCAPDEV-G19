@@ -1,5 +1,3 @@
-import { checkReservation, reserveRoom } from "../models/conferenceroomModel.js";
-
 async function submitReservation(confirmOverwrite = false) {
     const room = document.getElementById("room-selection").value;
     const date = document.getElementById("date-selection").value;
@@ -10,7 +8,7 @@ async function submitReservation(confirmOverwrite = false) {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
         alert("You must be logged in to make a reservation.");
-        window.location.href = "../views/login.html"; 
+        window.location.href = "login.html"; 
         return;
     }
 
@@ -25,7 +23,13 @@ async function submitReservation(confirmOverwrite = false) {
 
     try {
         // **Step 1: Check for existing reservations**
-        const checkResult = checkReservation(room, roomType, date, timeslot, seat, userTier);
+        const checkResponse = await fetch("http://localhost:3000/check-reservation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ room, roomType, date, timeslot, seat, userTier })
+        });
+
+        const checkResult = await checkResponse.json();
 
         if (checkResponse.ok) {
             if (checkResult.requireConfirmation) {
@@ -41,9 +45,15 @@ async function submitReservation(confirmOverwrite = false) {
         }
 
         // **Step 3: Proceed with reservation (with overwrite if needed)**
-        const reserveResult = reserveRoom(room, roomType, date, timeslot, seat, user.username, userTier, true);
+        const reserveResponse = await fetch("http://localhost:3000/reserve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ room, roomType, date, timeslot, seat, username: user.username, userTier, confirmOverwrite: true })
+        });
 
-        if (reserveResult.ok) {
+        const reserveResult = await reserveResponse.json();
+
+        if (reserveResponse.ok) {
             alert("Reservation successful!");
         } else {
             alert(`Error: ${reserveResult.error}`);

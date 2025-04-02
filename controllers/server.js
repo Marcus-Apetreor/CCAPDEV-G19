@@ -86,7 +86,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Serve static images correctly
-app.use('/views/img', express.static(imgDir));
+app.use('/img', express.static(imgDir)); // Serve static images from 'img' folder
+
 
 const rootDir = path.join(__dirname, '..');
 
@@ -102,7 +103,7 @@ app.get("/", (req, res) => {
 async function createUsersFromSampleData() {
     try {
         // load sample data
-        const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-users.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync('./controllers/sample_data/sample-users.json', 'utf-8'));
         for (const userData of sampleData) {
             const { username, email, password, tier, bio, profilePicture, approved } = userData;
 
@@ -147,7 +148,7 @@ function checkAuth(req, res, next) {
 async function createReservationsFromSampleData() {
     try {
         // load sample reservation data
-        const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-reservations.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync('./controllers/sample_data/sample-reservations.json', 'utf-8'));
         for (const reservationData of sampleData) {
             const { room, roomType, date, timeslot, seat, username } = reservationData;
 
@@ -806,6 +807,33 @@ app.delete('/disapprove-account/:username', checkAuth, async (req, res) => {
     }
 });
 
+const axios = require('axios');
+
+// Serve Ionicons files
+app.get('/ionicons/:file', async (req, res) => {
+    try {
+        const file = req.params.file;
+        const response = await axios.get(`https://unpkg.com/ionicons@7.1.0/dist/ionicons/${file}`, {
+            responseType: 'stream',
+        });
+        res.setHeader('Content-Type', 'application/javascript'); // Adjust if it's a different file type
+        response.data.pipe(res);
+    } catch (error) {
+        res.status(500).send('Error fetching file');
+    }
+});
+
+
+app.use('/controllers', express.static(path.join(__dirname, 'controllers')));
+app.use('/styles', express.static(path.join(__dirname, 'styles')));
+
+
+
+// Serve the main HTML file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'mainhub.html'));
+  });
+  
 
 // Start Server
 const PORT = process.env.PORT || 3000;

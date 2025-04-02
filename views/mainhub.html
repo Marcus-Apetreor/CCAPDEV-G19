@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnimoHub</title>
-    <link rel="stylesheet" href="/views/styles/hubstyle.css">
+    <link rel="stylesheet" href="/styles/hubstyle.css">
+
 </head>
 <body>
     <nav>
         <button onclick="toggleSidebar()"><ion-icon name="reorder-three-outline"></ion-icon></button>
+
         <h1>AnimoHub</h1>
-        <img src="/views/img/logo.png" alt="DLSU Logo" class="logo">
+        <img src="img/logo.png" alt="DLSU Logo" class="logo">
     </nav>
     <aside id="sidebar">
         <div class="profile">
-            <img src="/views/img/defaultdp.png" alt="Profile Picture" class="profile-picture" id="profile-picture">
+            <img src="img/defaultdp.png" alt="Profile Picture" class="profile-picture" id="profile-picture">
             <span class="username">Username</span>
         </div>
         <button class="sidebar-button" id="userProfileBtn">User Profile</button>
@@ -27,8 +29,9 @@
     </aside>
     <main id="main-content">
     </main>
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script type="module" src="/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="/ionicons/ionicons.js"></script>
+    
     
     <!-- Inline script for toggleSidebar -->
     <script>
@@ -39,6 +42,6 @@
             body.classList.toggle('sidebar-hidden');
         }
     </script>
-    <script src="/controllers/hubscripts.js"></script>
+  <script type="module" src="../controllers/hubscripts.js"></script>
 </body>
 </html>

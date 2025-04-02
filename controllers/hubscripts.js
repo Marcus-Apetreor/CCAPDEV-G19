@@ -1,13 +1,3 @@
-import {
-    fetchUserData,
-    updateUserProfile,
-    fetchUserReservations,
-    cancelAReservation,
-    fetchPendingAccounts,
-    approveAnAccount,
-    disapproveAnAccount
-} from "../models/hubscriptsModel.js";
-
 document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
@@ -26,13 +16,15 @@ document.addEventListener("DOMContentLoaded", function () {
     // Get logged-in user
     const user = JSON.parse(localStorage.getItem("user"));
 
+
+
     if (user) {
         console.log("User logged in:", user);
         console.log("Username:", user.username);
         console.log("Email:", user.email);
         console.log("Tier:", user.tier);
 
-        profilePicElement.src = user.profilePicture ? user.profilePicture : "/views/img/defaultdp.png";
+        profilePicElement.src = user.profilePicture ? user.profilePicture : "img/defaultdp.png";
 
 
         const usernameElement = document.querySelector(".username");
@@ -41,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     } else {
         // If no user is logged in, redirect to login page
-        window.location.href = "/views/loginpage.html";
+        window.location.href = "loginpage.html";
     }
 
     function checkAccountTier() {
@@ -74,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (logoutBtn) {
         logoutBtn.addEventListener("click", function () {
             localStorage.removeItem("user"); // Clear user data
-            window.location.href = "/views/loginpage.html"; // Redirect to login page
+            window.location.href = "loginpage.html"; // Redirect to login page
         });
     }
 
@@ -87,16 +79,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
     
-            const response = await fetchUserData(user.username);
+            const response = await fetch(`http://localhost:3000/get-user?username=${user.username}`);
             if (!response.ok) throw new Error('Failed to fetch user data');
     
-            localStorage.setItem('user', JSON.stringify(response)); // Update localStorage
+            const updatedUser = await response.json();
+            localStorage.setItem('user', JSON.stringify(updatedUser)); // Update localStorage
     
             // Render User Profile with the latest data
             mainContent.innerHTML = `
                 <h2>User Profile</h2>
                 <div class="profile-section">
-                    <img src="${updatedUser.profilePicture || '/views/img/profile.jpg'}" alt="Profile Picture" class="profile-picture" id="profile-picture2">
+                    <img src="${updatedUser.profilePicture || 'resources/profile.jpg'}" alt="Profile Picture" class="profile-picture" id="profile-picture2">
                     <br>
                     <span class="username">${updatedUser.username}</span>
                     <form id="profileForm" class="profile-form">
@@ -133,8 +126,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
     
                 try {
-                    const updateResponse = await updateUserProfile(formData);
-
+                    const updateResponse = await fetch(`http://localhost:3000/update-profile`, {
+                        method: 'POST',
+                        body: formData
+                    });
+    
                     if (updateResponse.ok) {
                         const newUserData = await updateResponse.json();
                         localStorage.setItem('user', JSON.stringify(newUserData));
@@ -168,7 +164,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         try {
-            const reservations = await fetchUserReservations(user.username);
+            const response = await fetch(`http://localhost:3000/my-reservations?username=${user.username}`);
+            const reservations = await response.json();
     
             let tableRows = reservations.map(reservation => `
                 <tr>
@@ -230,7 +227,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!confirmation) return;
     
         try {
-            const response = await cancelAReservation(room, seat, date, timeslot, username);
+            const response = await fetch("http://localhost:3000/cancel-reservation", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ room, seat, date, timeslot, username }) // 🔹 Ensure JSON is sent
+            });
     
             if (response.ok) {
                 alert("Reservation canceled successfully.");
@@ -253,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reserveRoomBtn.addEventListener('click', () => {
             mainContent.innerHTML = `
                 <h2>Reserve a Room</h2>
-                <iframe src="/views/roomreservation.html" width="100%" height="600px" style="border:none;"></iframe>
+                <iframe src="roomreservation.html" width="100%" height="600px" style="border:none;"></iframe>
             `;
         });
     }
@@ -263,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reserveComputerBtn.addEventListener('click', () => {
             mainContent.innerHTML = `
                 <h2>Reserve a Computer</h2>
-                <iframe src="/views/computer-lab.html" width="100%" height="600px" style="border:none;"></iframe>
+                <iframe src="computer-lab.html" width="100%" height="600px" style="border:none;"></iframe>
             `;
         });
     }
@@ -273,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
         addRoomBtn.addEventListener('click', () => {
             mainContent.innerHTML = `
                 <h2>Add/Update Reservations</h2>
-                <iframe src="/views/add-update-room.html" width="100%" height="600px" style="border:none;"></iframe>
+                <iframe src="add-update-room.html" width="100%" height="600px" style="border:none;"></iframe>
             `;
         });
     }
@@ -282,7 +283,8 @@ document.addEventListener("DOMContentLoaded", function () {
 if (approveAccBtn) {
     approveAccBtn.addEventListener('click', async () => {
         try {
-            const accounts = await fetchPendingAccounts();
+            const response = await fetch('http://localhost:3000/pending-accounts');
+            const accounts = await response.json();
 
             let accountRows = accounts.map((account, index) => `
                 <tr id="account-${index}">
@@ -352,9 +354,14 @@ if (approveAccBtn) {
 // Function to approve account (using username)
 async function approveAccount(username, index) {
     try {
-        const result = await approveAnAccount(username)
+        const response = await fetch(`http://localhost:3000/approve-account/${username}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-        if (result.ok) {
+        const result = await response.json();
+
+        if (response.ok) {
             alert('Account approved successfully!');
             document.getElementById(`account-${index}`).remove(); // Remove the row from the table
         } else {
@@ -369,9 +376,14 @@ async function approveAccount(username, index) {
 // Function to disapprove account (using username)
 async function disapproveAccount(username, index) {
     try {
-        const result = await disapproveAnAccount(username)
+        const response = await fetch(`http://localhost:3000/disapprove-account/${username}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-        if (result.ok) {
+        const result = await response.json();
+
+        if (response.ok) {
             alert('Account disapproved successfully!');
             document.getElementById(`account-${index}`).remove(); // Remove the row from the table
         } else {
@@ -385,3 +397,8 @@ async function disapproveAccount(username, index) {
 
 
 });
+
+function toggleSidebar() {
+    sidebar.classList.toggle('hide');
+    body.classList.toggle('sidebar-hidden');
+}
