@@ -1,4 +1,4 @@
-import { checkReservation, reserveRoom } from "/models/conferenceroomModel.js";
+import { checkReservation, reserveRoom } from "../models/conferenceroomModel.js";
 
 async function submitReservation(confirmOverwrite = false) {
     const room = document.getElementById("room-selection").value;

@@ -6,7 +6,7 @@ import {
     fetchPendingAccounts,
     approveAnAccount,
     disapproveAnAccount
-} from "/models/hubscriptsModel.js";
+} from "../models/hubscriptsModel.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById('sidebar');

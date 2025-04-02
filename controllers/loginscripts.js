@@ -1,7 +1,7 @@
 import { 
     registerUser,
     loginUser
- } from "/models/loginscriptsModel.js";
+ } from "../models/loginscriptsModel.js";
 
 function showForm(formType) {
     document.getElementById('login-form').classList.remove('active');

@@ -1,7 +1,7 @@
 import { 
     checkReservation, 
     reserveRoom 
-} from "/models/lectureroomModel.js";
+} from "../models/lectureroomModel.js";
 
 async function submitReservation(confirmOverwrite = false) {
     const room = document.getElementById("room-selection").value;

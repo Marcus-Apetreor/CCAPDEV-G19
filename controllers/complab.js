@@ -2,7 +2,7 @@ import { checkReservation,
     reserveSeat, 
     checkReservationSeats,
     checkStudent,
-} from "/models/complabModel.js";
+} from "../models/complabModel.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const reserveForStudentContainer = document.getElementById("reserveForStudentContainer");
