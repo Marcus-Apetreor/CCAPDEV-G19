@@ -10,17 +10,58 @@ const User = require('./models/User'); // Import User model
 const Reservation = require("./models/Reservation"); 
 const fs = require('fs');
 const Application = require("./models/Application"); 
-
-
-
+const session = require('express-session');
 
 const app = express();
+
+
+app.use(session({
+    secret: 'secret-key',  // Keep this key secret in production
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // Cookies should be secure only in production (via HTTPS)
+        httpOnly: true, // Prevent client-side JS from accessing cookies
+        sameSite: 'strict', // Prevent CSRF attacks
+        maxAge: 24 * 60 * 60 * 1000 // 1-day session expiration, adjust as needed
+    }
+}));
 
 // Configure CORS to allow requests from your frontend origin
 app.use(cors());
 
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files from the uploads directory
+
+// Middleware for session expiration or tracking last activity
+app.use((req, res, next) => {
+    const sessionDuration = 30 * 60 * 1000; // Set session duration to 30 minutes
+    const currentTime = Date.now();
+
+    if (req.session.user) {
+        // If the session exists, check if lastActivity is defined
+        if (req.session.user.lastActivity) {
+            const elapsed = currentTime - req.session.user.lastActivity;
+            if (elapsed > sessionDuration) {
+                req.session.destroy((err) => {
+                    if (err) {
+                        return res.status(500).json({ error: 'Session expired, failed to log out' });
+                    }
+                    res.clearCookie('connect.sid'); // Clear session cookie if expired
+                    return res.status(403).json({ error: 'Session expired, please log in again.' });
+                });
+            }
+        }
+        // Update the lastActivity timestamp for the active session
+        req.session.user.lastActivity = currentTime;
+    } else {
+        // If req.session.user is undefined, initialize it (optional)
+        req.session.user = {};
+    }
+
+    next(); // Continue with the next middleware/route handler
+});
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -96,6 +137,12 @@ async function createUsersFromSampleData() {
 }
 createUsersFromSampleData();
 
+function checkAuth(req, res, next) {
+    if (!req.session.user) {
+        return res.status(403).json({ error: 'You must be logged in to access this route.' });
+    }
+    next(); // Proceed to the next middleware/route handler
+}
 
 async function createReservationsFromSampleData() {
     try {
@@ -133,7 +180,7 @@ createReservationsFromSampleData();
 
 
 
-app.post('/register', async (req, res) => {
+app.post('/register', checkAuth, async (req, res) => {
     console.log("Received a request to /register");
     console.log("Request headers:", req.headers);
     console.log("Request body:", req.body);
@@ -210,7 +257,7 @@ app.post('/register', async (req, res) => {
 
 
 
-app.post('/update-profile', upload.single('profilePicture'), async (req, res) => {
+app.post('/update-profile', upload.single('profilePicture'), checkAuth, async (req, res) => {
     try {
         const { bio, username } = req.body; // ✅ Use username
 
@@ -239,8 +286,6 @@ app.post('/update-profile', upload.single('profilePicture'), async (req, res) =>
 });
 
 
-
-
 app.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -262,15 +307,29 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ error: "Invalid username or password" });
         }
 
-        // **4. Return success response**
-        res.status(200).json({
-            message: "Login successful",
-            user: {
+        // **4. Regenerate session ID for security (session fixation protection)**
+        req.session.regenerate((err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Failed to regenerate session.' });
+            }
+
+            // **5. Store user data in the session**
+            req.session.user = {
                 username: user.username,
-                email: user.email,
                 tier: user.tier,
                 profilePicture: user.profilePicture
-            }
+            };
+
+            // **6. Return success response**
+            res.status(200).json({
+                message: "Login successful",
+                user: {
+                    username: user.username,
+                    email: user.email,
+                    tier: user.tier,
+                    profilePicture: user.profilePicture
+                }
+            });
         });
 
     } catch (error) {
@@ -279,7 +338,8 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post("/check-reservation", async (req, res) => {
+
+app.post("/check-reservation", checkAuth, async (req, res) => {
     try {
         const { room, roomType, date, timeslot, seat, userTier } = req.body;
 
@@ -337,7 +397,7 @@ app.post("/check-reservation", async (req, res) => {
     }
 });
 
-app.post("/check-reservation-seats", async (req, res) => {
+app.post("/check-reservation-seats", checkAuth, async (req, res) => {
     try {
         const { room, date, timeslot } = req.body;
 
@@ -383,7 +443,7 @@ app.post("/check-reservation-seats", async (req, res) => {
 
 
 
-app.post("/reserve", async (req, res) => {
+app.post("/reserve", checkAuth, async (req, res) => {
     try {
         const { room, roomType, date, timeslot, seat, username, userTier, confirmOverwrite } = req.body;
 
@@ -488,7 +548,7 @@ app.post("/reserve", async (req, res) => {
     }
 });
 
-app.delete('/cancel-reservation', async (req, res) => {
+app.delete('/cancel-reservation', checkAuth, async (req, res) => {
     console.log("Received DELETE request:", req.body);
 
     try {
@@ -530,7 +590,7 @@ app.delete('/cancel-reservation', async (req, res) => {
 
 
 
-app.get("/check-student", async (req, res) => {
+app.get("/check-student", checkAuth, async (req, res) => {
     try {
         const { username } = req.query;
         if (!username) return res.status(400).json({ error: "Username is required." });
@@ -544,7 +604,7 @@ app.get("/check-student", async (req, res) => {
     }
 });
 
-app.get('/get-user', async (req, res) => {
+app.get('/get-user', checkAuth, async (req, res) => {
     try {
         const { username } = req.query;
         if (!username) return res.status(400).json({ error: "Username is required." });
@@ -562,7 +622,7 @@ app.get('/get-user', async (req, res) => {
 
 
 
-app.get("/user-reservations", async (req, res) => {
+app.get("/user-reservations", checkAuth, async (req, res) => {
     try {
         const { username, date } = req.query;
 
@@ -602,7 +662,7 @@ app.get("/user-reservations", async (req, res) => {
     }
 });
 
-app.get("/reservations", async (req, res) => {
+app.get("/reservations", checkAuth, async (req, res) => {
     try {
         const reservations = await Reservation.find();
         res.json(reservations);
@@ -612,7 +672,7 @@ app.get("/reservations", async (req, res) => {
 });
 
 // Update reservation when seat is "N/A" or null
-app.put("/update-reservation", async (req, res) => {
+app.put("/update-reservation", checkAuth, async (req, res) => {
     try {
         const { 
             originalUsername, 
@@ -654,7 +714,7 @@ app.put("/update-reservation", async (req, res) => {
 
 
 
-app.get("/my-reservations", async (req, res) => {
+app.get("/my-reservations", checkAuth, async (req, res) => {
     try {
         const { username } = req.query;
         if (!username) {
@@ -669,9 +729,19 @@ app.get("/my-reservations", async (req, res) => {
     }
 });
 
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to log out' });
+        }
+        res.clearCookie('connect.sid'); // Clear the session cookie
+        res.status(200).json({ message: 'Logged out successfully' });
+    });
+});
+
 
 // Server-side endpoint to retrieve all accounts in the Application database
-app.get('/pending-accounts', async (req, res) => {
+app.get('/pending-accounts', checkAuth, async (req, res) => {
     try {
         // Fetch all accounts from the Application collection
         const applications = await Application.find();
@@ -687,7 +757,7 @@ app.get('/pending-accounts', async (req, res) => {
 
 // Approve account route
 // Approve account route (use username instead of accountId)
-app.put('/approve-account/:username', async (req, res) => {
+app.put('/approve-account/:username', checkAuth, async (req, res) => {
     try {
         const { username } = req.params;
 
@@ -720,7 +790,7 @@ app.put('/approve-account/:username', async (req, res) => {
 
 
 // Disapprove account route (use username instead of accountId)
-app.delete('/disapprove-account/:username', async (req, res) => {
+app.delete('/disapprove-account/:username', checkAuth, async (req, res) => {
     try {
         const { username } = req.params;
 
