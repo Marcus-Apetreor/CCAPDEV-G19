@@ -1,0 +1,43 @@
+[
+    {
+        "username": "admin1",
+        "email": "admin1@gmail.com",
+        "password": "adminpassword",
+        "tier": 4,
+        "approved": true
+    },
+
+    {
+        "username": "adminsample",
+        "email": "adminsample@gmail.com",
+        "password": "adminpass",
+        "tier": 4,
+        "approved": true
+    },
+
+    {
+        "username": "studentsample1",
+        "email": "studentsample1@gmail.com",
+        "password": "studentpass",
+        "tier": 1,
+        "bio": "This is Student 1",
+        "profilePicture": "/img/defaultdp.png"
+    },
+
+    {
+        "username": "officersample",
+        "email": "officersample@gmail.com",
+        "password": "officerpass",
+        "tier": 2,
+        "bio": "This is Officer 1"
+    },
+
+    {
+        "username": "staffsample",
+        "email": "staffsample@gmail.com",
+        "password": "staffpass",
+        "tier": 3,
+        "bio": "This is Staff 1",
+        "approved": true
+    }
+]

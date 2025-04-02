@@ -1,0 +1,124 @@
+[
+    {
+        "room": "AG103",
+        "roomType": "conference",
+        "date": "2025-04-05",
+        "timeslot": "9:15 AM - 10:45 AM",
+        "seat": null,
+        "username": "admin1"
+    },
+    {
+        "room": "LS110",
+        "roomType": "lecture",
+        "date": "2025-04-25",
+        "timeslot": "7:45 PM - 9:15 PM",
+        "username": "admin1"
+    },
+    {
+        "room": "GK303",
+        "roomType": "complab",
+        "date": "2025-04-30",
+        "timeslot": "5:00 PM - 7:00 PM",
+        "seat": "S11",
+        "username": "adminsample"
+    },
+    {
+        "room": "GK303",
+        "roomType": "complab",
+        "date": "2025-04-30",
+        "timeslot": "5:00 PM - 7:00 PM",
+        "seat": "S10",
+        "username": "adminsample"
+    },
+    {
+        "room": "GK205",
+        "roomType": "complab",
+        "date": "2025-04-13",
+        "timeslot": "11:00 AM - 12:30 PM",
+        "seat": "S5",
+        "username": "studentsample1",
+        "userTier": 1,
+        "reservedBy": "adminsample"
+    },
+    {
+        "room": "AG102",
+        "roomType": "conference",
+        "date": "2025-04-18",
+        "timeslot": "11:00 AM - 12:30 PM",
+        "username": "staffsample"
+    },
+    {
+        "room": "LS107",
+        "roomType": "lecture",
+        "date": "2025-04-18",
+        "timeslot": "12:45 PM - 2:15 PM",
+        "username": "staffsample"
+    },
+    {
+        "room": "GK208",
+        "roomType": "complab",
+        "date": "2025-04-18",
+        "timeslot": "4:00 PM - 7:00 PM",
+        "seat": "S1",
+        "username": "staffsample"
+    },
+    {
+        "room": "GK208",
+        "roomType": "complab",
+        "date": "2025-04-18",
+        "timeslot": "4:00 PM - 7:00 PM",
+        "seat": "S2",
+        "username": "studentsample1",
+        "userTier": 1,
+        "reservedBy": "staffsample"
+    },
+    {
+        "room": "GK208",
+        "roomType": "complab",
+        "date": "2025-04-18",
+        "timeslot": "4:00 PM - 7:00 PM",
+        "seat": "S3",
+        "username": "officersample",
+        "userTier": 2,
+        "reservedBy": "staffsample"
+    },
+    {
+        "room": "LS105",
+        "roomType": "lecture",
+        "date": "2025-04-11",
+        "timeslot": "2:30 PM - 4:00 PM",
+        "username": "officersample"
+    },
+    {
+        "room": "AG110",
+        "roomType": "conference",
+        "date": "2025-04-11",
+        "timeslot": "7:30 AM - 9:00 AM",
+        "username": "officersample"
+    },
+    {
+        "room": "GK301",
+        "roomType": "complab",
+        "date": "2025-04-17",
+        "timeslot": "12:45 PM - 2:15 PM",
+        "seat": "S25",
+        "username": "officersample"
+    },
+    {
+        "room": "GK306",
+        "roomType": "complab",
+        "date": "2025-04-22",
+        "timeslot": "2:30 PM - 4:00 PM",
+        "seat": "S13",
+        "username": "studentsample1"
+    },
+    {
+        "room": "GK202",
+        "roomType": "complab",
+        "date": "2025-05-01",
+        "timeslot": "9:15 AM - 10:45 AM",
+        "seat": "S18",
+        "username": "studentsample1"
+    }
+    
+]

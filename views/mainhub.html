@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimoHub</title>
+    <link rel="stylesheet" href="/styles/hubstyle.css">
+
+</head>
+<body>
+    <nav>
+        <button onclick="toggleSidebar()"><ion-icon name="reorder-three-outline"></ion-icon></button>
+
+        <h1>AnimoHub</h1>
+        <img src="img/logo.png" alt="DLSU Logo" class="logo">
+    </nav>
+    <aside id="sidebar">
+        <div class="profile">
+            <img src="img/defaultdp.png" alt="Profile Picture" class="profile-picture" id="profile-picture">
+            <span class="username">Username</span>
+        </div>
+        <button class="sidebar-button" id="userProfileBtn">User Profile</button>
+        <button class="sidebar-button" id="myReservationsBtn">My Reservations</button>
+        <button class="sidebar-button" id="reserveComputerBtn" style="display: none;">Reserve a Computer</button>
+        <button class="sidebar-button" id="reserveRoomBtn" style="display: none;">Reserve a Room</button>
+        <button class="sidebar-button" id="addRoomBtn" style="display: none;">Add/Update Reservations</button>
+        <button class="sidebar-button" id="approveAccBtn" style="display: none;">Approve Accounts</button>
+        <button class="sidebar-button" id="aboutBtn">About</button>
+        <button class="sidebar-button" id="logoutBtn" href="loginpage.html">Logout</button> 
+    </aside>
+    <main id="main-content">
+    </main>
+    <script type="module" src="/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="/ionicons/ionicons.js"></script>
+    
+    
+    <!-- Inline script for toggleSidebar -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            sidebar.classList.toggle('hide');
+            body.classList.toggle('sidebar-hidden');
+        }
+    </script>
+  <script type="module" src="../controllers/hubscripts.js"></script>
+</body>
+</html>
