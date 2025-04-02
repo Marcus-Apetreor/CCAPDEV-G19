@@ -8,7 +8,7 @@ async function submitReservation(confirmOverwrite = false) {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
         alert("You must be logged in to make a reservation.");
-        window.location.href = "login.html"; 
+        window.location.href = "../views/loginpage.html"; 
         return;
     }
 

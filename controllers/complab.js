@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!user) {
         alert("You must be logged in to make a reservation.");
-        window.location.href = "login.html";
+        window.location.href = "../views/loginpage.html";
         return;
     }
 

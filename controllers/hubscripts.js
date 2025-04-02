@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     } else {
         // If no user is logged in, redirect to login page
-        window.location.href = "loginpage.html";
+        window.location.href = "../views/loginpage.html";
     }
 
     function checkAccountTier() {
