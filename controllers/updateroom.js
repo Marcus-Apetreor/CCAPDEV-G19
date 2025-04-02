@@ -1,23 +1,19 @@
-
-    const filterDropdown = document.getElementById("filterRoomType");
-    const searchInput = document.getElementById("searchRoom");
-    const searchButton = document.getElementById("searchButton");
-    const tableBody = document.getElementById("reservationTable");
+import {
+    fetchReservations,
+    cancelAReservation,
+    updateReservation,
+    checkStudent,
+    checkReservation,
+    reserveRoom
+} from "../models/updateroomModel.js";
+    
+const filterDropdown = document.getElementById("filterRoomType");
+const searchInput = document.getElementById("searchRoom");
+const searchButton = document.getElementById("searchButton");
+const tableBody = document.getElementById("reservationTable");
 
     let allReservations = []; // Store all reservations from DB
     let isSearching = false; // Track if search is active
-
-    // Fetch reservations from database
-    async function fetchReservations() {
-        try {
-            const response = await fetch("http://localhost:3000/reservations");
-            if (!response.ok) throw new Error("Failed to fetch reservations.");
-            allReservations = await response.json();
-            renderReservations();
-        } catch (error) {
-            console.error("Error fetching reservations:", error);
-        }
-    }
 
   // Render reservations based on filters OR search
 function renderReservations() {
@@ -185,8 +181,7 @@ document.getElementById("editForm").addEventListener("submit", async function (e
 
     try {
         // 🔹 Step 2: Check if the Username Exists in the Database
-        const usernameResponse = await fetch(`http://localhost:3000/check-student?username=${usernameInput}`);
-        const usernameResult = await usernameResponse.json();
+        const usernameResult = checkStudent(usernameInput);
 
         if (!usernameResult.exists) {
             alert("Student not found. Please enter a valid username.");
@@ -216,20 +211,14 @@ document.getElementById("editForm").addEventListener("submit", async function (e
         console.log("Sending update request with data:", updatedReservation);
 
         // 🔹 Step 3: Proceed with Updating Reservation
-        const response = await fetch("http://localhost:3000/update-reservation", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedReservation)
-        });
-
-        const result = await response.json();
+        const response = await updateReservation(updatedReservation);
 
         if (response.ok) {
             alert("Reservation updated successfully!");
             fetchReservations(); // Refresh table
             bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
         } else {
-            alert(result.error || "Failed to update reservation.");
+            alert(response.error || "Failed to update reservation.");
         }
     } catch (error) {
         console.error("Error updating reservation:", error);
@@ -272,11 +261,7 @@ function generateTimeOptions(selectElement, startHour, startMinute) {
     // Cancel Reservation Function
     async function cancelReservation(room, seat, date, timeslot, username) {
         try {
-            const response = await fetch("http://localhost:3000/cancel-reservation", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ room, seat, date, timeslot, username })
-            });
+            const response = await cancelAReservation(room, seat, date, timeslot, username);
 
             if (response.ok) {
                 alert("Reservation canceled successfully.");
@@ -374,7 +359,7 @@ document.getElementById("addRoomType").addEventListener("change", function () {
 });
 
 
-function addReservation(event) {
+async function addReservation(event) {
     event.preventDefault();
 
     const selectedRoomType = document.getElementById("addRoomType").value;
@@ -396,66 +381,45 @@ function addReservation(event) {
         return;
     }
 
-    // **Step 1: Validate Username Existence**
-    fetch(`http://localhost:3000/check-student?username=${enteredUsername}`)
-        .then(response => response.json())
-        .then(result => {
-            if (!result.exists) {
-                alert("Student not found. Please enter a valid username.");
-                throw new Error("Invalid username");
+    try {
+        // **Step 1: Validate Username Existence**
+        const studentExists = await checkStudent(enteredUsername);
+        if (!studentExists.exists) {
+            alert("Student not found. Please enter a valid username.");
+            return;
+        }
+
+        // **Step 2: Create Reservation Object**
+        const newReservation = {
+            room: document.getElementById("addRoom").value,
+            roomType: selectedRoomType,
+            date: document.getElementById("addDate").value,
+            timeslot: timeBlockValue,
+            seat: selectedRoomType === "complab" ? (document.getElementById("addSeat").value || null) : null,
+            username: enteredUsername,
+            userTier: userTier
+        };
+
+        // **Step 3: Check for Existing Reservations**
+        const checkResult = await checkReservation({
+            room: newReservation.room,
+            roomType: newReservation.roomType,
+            date: newReservation.date,
+            timeslot: newReservation.timeslot,
+            seat: newReservation.seat,
+            userTier: newReservation.userTier
+        });
+
+        if (checkResult.requireConfirmation) {
+            // **Step 4: Ask for Confirmation if Needed**
+            const userConfirmed = confirm(checkResult.message);
+            if (!userConfirmed) {
+                alert("Reservation not made.");
+                return;
             }
 
-            // **Step 2: Create Reservation Object**
-            const newReservation = {
-                room: document.getElementById("addRoom").value,
-                roomType: selectedRoomType,
-                date: document.getElementById("addDate").value,
-                timeslot: timeBlockValue,
-                seat: selectedRoomType === "complab" ? (document.getElementById("addSeat").value || null) : null,
-                username: enteredUsername,
-                userTier: userTier
-            };
-
-            // **Step 3: Check for Existing Reservations**
-            return fetch("http://localhost:3000/check-reservation", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    room: newReservation.room,
-                    roomType: newReservation.roomType,
-                    date: newReservation.date,
-                    timeslot: newReservation.timeslot,
-                    seat: newReservation.seat,
-                    userTier: newReservation.userTier
-                })
-            }).then(response => response.json().then(checkResult => ({ checkResult, newReservation })));
-        })
-        .then(({ checkResult, newReservation }) => {
-            if (checkResult.requireConfirmation) {
-                // **Step 4: Ask for Confirmation if Needed**
-                const userConfirmed = confirm(checkResult.message);
-                if (!userConfirmed) {
-                    alert("Reservation not made.");
-                    throw new Error("User canceled reservation");
-                }
-
-                // **Step 5: Proceed with Overwrite**
-                return fetch("http://localhost:3000/reserve", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ...newReservation, confirmOverwrite: true })
-                });
-            } else {
-                // **Step 6: Directly Proceed with Reservation**
-                return fetch("http://localhost:3000/reserve", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(newReservation)
-                });
-            }
-        })
-        .then(reserveResponse => reserveResponse.json())
-        .then(reserveResult => {
+            // **Step 5: Proceed with Overwrite**
+            const reserveResult = await reserveRoom({ ...newReservation, confirmOverwrite: true });
             if (reserveResult.message === "Reservation successful!") {
                 alert("Reservation successful!");
                 fetchReservations(); // Refresh table
@@ -463,16 +427,22 @@ function addReservation(event) {
             } else {
                 alert(`Error: ${reserveResult.error}`);
             }
-        })
-        .catch(error => {
-            console.error("Error adding reservation:", error);
-            
-        });
+        } else {
+            // **Step 6: Directly Proceed with Reservation**
+            const reserveResult = await reserveRoom(newReservation);
+            if (reserveResult.message === "Reservation successful!") {
+                alert("Reservation successful!");
+                fetchReservations(); // Refresh table
+                bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+            } else {
+                alert(`Error: ${reserveResult.error}`);
+            }
+        }
+    } catch (error) {
+        console.error("Error adding reservation:", error);
+        alert("An error occurred. Please try again.");
+    }
 }
-
-
-
-
 
 document.getElementById("addForm").addEventListener("submit", addReservation);
 document.addEventListener("DOMContentLoaded", function () {

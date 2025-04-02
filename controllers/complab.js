@@ -1,3 +1,9 @@
+import { checkReservation, 
+    reserveSeat, 
+    checkReservationSeats,
+    checkStudent,
+} from "../models/complabsModel.js";
+
 document.addEventListener("DOMContentLoaded", () => {
     const reserveForStudentContainer = document.getElementById("reserveForStudentContainer");
     const reserveForStudentCheckbox = document.getElementById("reserveForStudentCheckbox");
@@ -12,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!user) {
         alert("You must be logged in to make a reservation.");
-        window.location.href = "login.html";
+        window.location.href = "/views/login.html";
         return;
     }
 
@@ -57,8 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3000/check-student?username=${enteredUsername}`);
-            const result = await response.json();
+            const response = checkStudent(enteredUsername);
 
             if (response.ok && result.exists) {
                 studentUsername = enteredUsername;
@@ -90,7 +95,7 @@ async function submitReservation(usernameOverride = null) {
 
     if (!user) {
         alert("You must be logged in to make a reservation.");
-        window.location.href = "login.html";
+        window.location.href = "/views/login.html";
         return;
     }
 
@@ -123,7 +128,7 @@ async function submitReservation(usernameOverride = null) {
     // Fetch user's total reservation duration for the day
     let dailyReservedMinutes = 0;
     try {
-        const response = await fetch(`http://localhost:3000/user-reservations?username=${user.username}&date=${date}`);
+        const response = await checkStudent(enteredUsername);
         const data = await response.json();
 
         if (response.ok) {
@@ -156,37 +161,17 @@ let failedReservations = 0;
 for (let seat of selectedSeats) {
         try {
             // Check for conflicts
-            const checkResponse = await fetch("http://localhost:3000/check-reservation", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ room, roomType: "complab", date, timeslot, seat, userTier })
-            });
+            const result1 = await checkReservation(room, "complab", date, timeslot, seat, userTier);
 
-            const checkResult = await checkResponse.json();
-
-            if (checkResult.requireConfirmation) {
+            if (result1.requireConfirmation) {
                 const userConfirmed = confirm(checkResult.message);
                 if (!userConfirmed) return;
             }
 
             // Submit reservation
-            const response = await fetch("http://localhost:3000/reserve", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    room, 
-                    roomType: "complab", 
-                    date, 
-                    timeslot, 
-                    seat, 
-                    username: reservationUsername, 
-                    userTier 
-                })
-            });
+            const result2 = await reserveSeat(room, "complab", date, timeslot, seat, reservationUsername, userTier);
 
-            const result = await response.json();
-
-            if (response.ok) {
+            if (result2) {
                 successfulReservations++;
             } else {
                 failedReservations++;
@@ -207,7 +192,6 @@ for (let seat of selectedSeats) {
     }
 }
 
-
 async function fetchTakenSeats() {
     const selectedRoom = document.getElementById("seat-selection").value;
     const selectedDate = document.getElementById("date-selection").value;
@@ -222,15 +206,9 @@ async function fetchTakenSeats() {
     const timeslot = `${startTime} - ${endTime}`;
 
     try {
-        const response = await fetch("http://localhost:3000/check-reservation-seats", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ room: selectedRoom, date: selectedDate, timeslot })
-        });
+        const result = await checkReservationSeats(selectedRoom, selectedDate, timeslot);
 
-        const data = await response.json();
-
-        if (response.ok) {
+        if (result) {
             updateSeatGrid(data.takenSeats);
         } else {
             console.error("Error fetching reservations:", data.error);
@@ -239,7 +217,6 @@ async function fetchTakenSeats() {
         console.error("Error:", error);
     }
 }
-
 
 function updateSeatGrid(takenSeats) {
     const seatGrid = document.getElementById("seat-grid");
@@ -278,13 +255,6 @@ function updateSeatGrid(takenSeats) {
         seatGrid.appendChild(seatBox);
     }
 }
-
-
-
-
-
-
-
 
 // Ensure button is correctly linked to the function
 document.addEventListener("DOMContentLoaded", () => {

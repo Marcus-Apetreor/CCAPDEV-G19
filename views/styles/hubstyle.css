@@ -43,7 +43,7 @@ nav {
     grid-area: navbar;
     top: 0;
     position: sticky;
-    background-image: url(../resources/navbar.jpg);
+    background-image: url(../img/navbar.jpg);
     background-size: cover;
     background-position: center;
     color: var(--text-color);

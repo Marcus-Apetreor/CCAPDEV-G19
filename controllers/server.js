@@ -6,10 +6,10 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs'); // For password hashing
 const multer = require('multer'); // For handling file uploads
 const path = require('path');
-const User = require('./models/User'); // Import User model
-const Reservation = require("./models/Reservation"); 
+const User = require('../models/User'); // Import User model
+const Reservation = require("../models/Reservation"); 
 const fs = require('fs');
-const Application = require("./models/Application"); 
+const Application = require("../models/Application"); 
 const session = require('express-session');
 
 const app = express();
@@ -31,7 +31,7 @@ app.use(session({
 app.use(cors());
 
 app.use(bodyParser.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'))); // Serve static files from the uploads directory
 
 // Middleware for session expiration or tracking last activity
 app.use((req, res, next) => {
@@ -68,7 +68,7 @@ mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.error("MongoDB Connection Error:", err));
 
-const imgDir = path.join(__dirname, '..', 'img'); // ✅ Moves "img" outside "scripts"
+const imgDir = path.join(__dirname, '..', 'views', 'img'); // ✅ Moves "img" outside "scripts"
 
 if (!fs.existsSync(imgDir)) {
     fs.mkdirSync(imgDir, { recursive: true });
@@ -86,22 +86,26 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Serve static images correctly
-app.use('/img', express.static(imgDir));
+app.use('/views/img', express.static(imgDir));
+
 const rootDir = path.join(__dirname, '..');
 
-// Serve static files (CSS, JS, images, etc.) from the root folder
+// Serve static files from the root directory
 app.use(express.static(rootDir));
+
+// Explicitly serve the views folder
+app.use('/views', express.static(path.join(rootDir, 'views')));
 
 // Serve mainhub.html when visiting localhost:3000
 app.get("/", (req, res) => {
-    res.sendFile(path.join(rootDir, 'mainhub.html'));
+    res.sendFile(path.join(rootDir, 'views', 'mainhub.html'));
 });
 
 
 async function createUsersFromSampleData() {
     try {
         // load sample data
-        const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-users.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'sample_data', 'sample-users.json'), 'utf-8'));
 
         for (const userData of sampleData) {
             const { username, email, password, tier, bio, profilePicture, approved } = userData;
@@ -124,7 +128,7 @@ async function createUsersFromSampleData() {
                 password: hashedPassword,
                 tier,
                 bio: bio || null,
-                profilePicture: profilePicture || "/img/defaultdp.png",
+                profilePicture: profilePicture || "/views/img/defaultdp.png",
                 approved: approved !== undefined ? approved : false // default false if not specified
             });
 
@@ -147,7 +151,7 @@ function checkAuth(req, res, next) {
 async function createReservationsFromSampleData() {
     try {
         // load sample reservation data
-        const sampleData = JSON.parse(fs.readFileSync('sample_data/sample-reservations.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'sample_data', 'sample-reservations.json'), 'utf-8'));
 
         for (const reservationData of sampleData) {
             const { room, roomType, date, timeslot, seat, username } = reservationData;
@@ -224,7 +228,7 @@ app.post('/register', checkAuth, async (req, res) => {
                 password: hashedPassword,
                 tier,
                 bio: null,
-                profilePicture: "/img/defaultdp.png", // Default profile picture
+                profilePicture: "/views/img/defaultdp.png", // Default profile picture
             });
 
             await newApplication.save();
@@ -241,7 +245,7 @@ app.post('/register', checkAuth, async (req, res) => {
                 password: hashedPassword,
                 tier,
                 bio: null,
-                profilePicture: "/img/defaultdp.png", // Default profile picture
+                profilePicture: "/views/img/defaultdp.png", // Default profile picture
                 approved: true // Auto approve for tier 1 and 4
             });
 
@@ -265,7 +269,7 @@ app.post('/update-profile', upload.single('profilePicture'), checkAuth, async (r
             return res.status(400).json({ error: "Username is required" });
         }
 
-        const profilePicture = req.file ? `/img/${req.file.filename}` : null; // ✅ Correct path
+        const profilePicture = req.file ? `/views/img/${req.file.filename}` : null;
 
         const updateData = { bio };
         if (profilePicture) {
@@ -774,7 +778,7 @@ app.put('/approve-account/:username', checkAuth, async (req, res) => {
             password: application.password,  // Assuming password is already hashed
             tier: application.tier,
             bio: application.bio || null,
-            profilePicture: application.profilePicture || "/img/defaultdp.png",
+            profilePicture: application.profilePicture || "/views/img/defaultdp.png",
             approved: true // Mark as approved
         });
 
