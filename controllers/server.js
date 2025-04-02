@@ -103,7 +103,7 @@ app.get("/", (req, res) => {
 async function createUsersFromSampleData() {
     try {
         // load sample data
-        const sampleData = JSON.parse(fs.readFileSync('./controllers/sample_data/sample-users.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-users.json', 'utf-8'));
         for (const userData of sampleData) {
             const { username, email, password, tier, bio, profilePicture, approved } = userData;
 
@@ -148,7 +148,7 @@ function checkAuth(req, res, next) {
 async function createReservationsFromSampleData() {
     try {
         // load sample reservation data
-        const sampleData = JSON.parse(fs.readFileSync('./controllers/sample_data/sample-reservations.json', 'utf-8'));
+        const sampleData = JSON.parse(fs.readFileSync('./sample_data/sample-reservations.json', 'utf-8'));
         for (const reservationData of sampleData) {
             const { room, roomType, date, timeslot, seat, username } = reservationData;
 

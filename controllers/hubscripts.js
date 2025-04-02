@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const reserveRoomBtn = document.getElementById('reserveRoomBtn');
     const addRoomBtn = document.getElementById('addRoomBtn');
     const reserveComputerBtn = document.getElementById('reserveComputerBtn');
+    const aboutBtn = document.getElementById('aboutBtn');
     const logoutBtn = document.getElementById("logoutBtn");
     const approveAccBtn = document.getElementById('approveAccBtn');
 
@@ -67,6 +68,14 @@ document.addEventListener("DOMContentLoaded", function () {
         logoutBtn.addEventListener("click", function () {
             localStorage.removeItem("user"); // Clear user data
             window.location.href = "loginpage.html"; // Redirect to login page
+        });
+    }
+
+    if (aboutBtn) {
+        aboutBtn.addEventListener("click", function () {
+            mainContent.innerHTML = `
+            <iframe src="../views/about.html" width="100%" height="600px" style="border:none;"></iframe>
+            `;
         });
     }
 
@@ -254,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reserveRoomBtn.addEventListener('click', () => {
             mainContent.innerHTML = `
                 <h2>Reserve a Room</h2>
-                <iframe src="roomreservation.html" width="100%" height="600px" style="border:none;"></iframe>
+                <iframe src="../views/roomreservation.html" width="100%" height="600px" style="border:none;"></iframe>
             `;
         });
     }
@@ -264,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reserveComputerBtn.addEventListener('click', () => {
             mainContent.innerHTML = `
                 <h2>Reserve a Computer</h2>
-                <iframe src="computer-lab.html" width="100%" height="600px" style="border:none;"></iframe>
+                <iframe src="../views/computer-lab.html" width="100%" height="600px" style="border:none;"></iframe>
             `;
         });
     }
@@ -274,7 +283,7 @@ document.addEventListener("DOMContentLoaded", function () {
         addRoomBtn.addEventListener('click', () => {
             mainContent.innerHTML = `
                 <h2>Add/Update Reservations</h2>
-                <iframe src="add-update-room.html" width="100%" height="600px" style="border:none;"></iframe>
+                <iframe src="../views/add-update-room.html" width="100%" height="600px" style="border:none;"></iframe>
             `;
         });
     }
@@ -397,8 +406,3 @@ async function disapproveAccount(username, index) {
 
 
 });
-
-function toggleSidebar() {
-    sidebar.classList.toggle('hide');
-    body.classList.toggle('sidebar-hidden');
-}
